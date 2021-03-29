@@ -16,8 +16,21 @@ services:
     ports:
       - '8000:8000'
     volumes:
-      - './docker/dynamodb:/home/dynamodblocal/data'
+      - './dynamodb:/home/dynamodblocal/data'
     working_dir: /home/dynamodblocal
+  #
+  dynamodb-admin:
+    image: aaronshaf/dynamodb-admin
+    container_name: dynamodb-admin
+    environment:
+      DYNAMO_ENDPOINT: http://dynamodb-local:8000
+      AWS_ACCESS_KEY_ID: '${AWS_ACCESS_KEY_ID}'
+      AWS_SECRET_ACCESS_KEY: '${AWS_SECRET_ACCESS_KEY}'
+      REGION: '${AWS_REGION}'
+    depends_on:
+      - dynamodb-local
+    ports:
+      - '8001:8001'
   #
   segfyschedule:
     image: segfyschedule
