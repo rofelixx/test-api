@@ -1,6 +1,40 @@
+variables:
+  PROJECT_NAME: 'Segfy.Schedule'
+  BUILD_IMAGE: 'registry.gitlab.com/segfy/docker_images/build_dotnet/dotnet5:4.0.3'
+
+stages:
+  - build
+  - test
+  - docker
+
+build:
+  stage: build
+  image: $BUILD_IMAGE
+  only:
+    - master
+  script:
+    - cd src/$PROJECT_NAME
+    - dotnet restore
+    - dotnet build --configuration Release
+    - dotnet publish --configuration Release --output ../../publish/
+  artifacts:
+    paths:
+      - ./publish/*
+  tags:
+    - segfy
+
+test:
+  stage: test
+  image: $BUILD_IMAGE
+  script:
+    - cd tests/$PROJECT_NAME.Tests
+    - dotnet test /p:CollectCoverage=true
+  tags:
+    - segfy
+
 docker-build:
   image: docker:latest
-  stage: build
+  stage: docker
   services:
     - docker:dind
   before_script:
@@ -20,3 +54,5 @@ docker-build:
     - if: $CI_COMMIT_BRANCH
       exists:
         - Dockerfile
+  tags:
+    - segfy
