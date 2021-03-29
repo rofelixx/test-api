@@ -57,7 +57,5 @@ docker-build:
     - docker push "$CI_REGISTRY_IMAGE${tag}"
   rules:
     - if: $CI_COMMIT_BRANCH
-      exists:
-        - ./src/$PROJECT_NAME/Dockerfile
   tags:
     - segfy
