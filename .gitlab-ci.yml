@@ -28,7 +28,7 @@ test:
   image: $BUILD_IMAGE
   script:
     - cd tests/$PROJECT_NAME.Tests
-    - dotnet test"
+    - dotnet test /p:CollectCoverage=true
   tags:
     - segfy
 
