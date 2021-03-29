@@ -31,7 +31,7 @@ test:
     - dotnet test -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura
   artifacts:
     reports:
-      cobertura: ./tests/$PROJECT_NAME.Tests/tescoverage.cobertura.xml
+      cobertura: ./tests/$PROJECT_NAME.Tests/coverage.cobertura.xml
   tags:
     - segfy
 
