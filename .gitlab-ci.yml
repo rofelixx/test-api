@@ -28,7 +28,10 @@ test:
   image: $BUILD_IMAGE
   script:
     - cd tests/$PROJECT_NAME.Tests
-    - dotnet test /p:CollectCoverage=true
+    - dotnet test -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura
+  artifacts:
+    reports:
+      cobertura: coverage.cobertura.xml
   tags:
     - segfy
 
