@@ -1,0 +1,39 @@
+version: '3.4'
+services:
+  consul-server1:
+    image: 'consul:1.9.3'
+    container_name: consul-server1
+    ports:
+      - '8500:8500'
+      - '8600:8600/tcp'
+      - '8600:8600/udp'
+    command: agent -ui -server -bootstrap -client=0.0.0.0
+  #
+  dynamodb-local:
+    command: '-jar DynamoDBLocal.jar -sharedDb -optimizeDbBeforeStartup -dbPath ./data'
+    image: 'amazon/dynamodb-local:latest'
+    container_name: dynamodb-local
+    ports:
+      - '8000:8000'
+    volumes:
+      - './docker/dynamodb:/home/dynamodblocal/data'
+    working_dir: /home/dynamodblocal
+  #
+  segfyschedule:
+    image: segfyschedule
+    depends_on:
+      - dynamodb-local
+      - consul-server1
+    build:
+      context: .
+      dockerfile: src/Segfy.Schedule/Dockerfile
+    ports:
+      - '5050:5050'
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:5050
+      AWS_ACCESS_KEY_ID: '${AWS_ACCESS_KEY_ID}'
+      AWS_SECRET_ACCESS_KEY: '${AWS_SECRET_ACCESS_KEY}'
+      REGION: '${AWS_REGION}'
+    volumes:
+      - ~/.vsdbg:/remote_debugger:rw
