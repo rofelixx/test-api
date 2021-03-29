@@ -58,6 +58,6 @@ docker-build:
   rules:
     - if: $CI_COMMIT_BRANCH
       exists:
-        - cd ./src/$PROJECT_NAME/Dockerfile
+        - ./src/$PROJECT_NAME/Dockerfile
   tags:
     - segfy
