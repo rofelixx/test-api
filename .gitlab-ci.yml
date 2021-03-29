@@ -26,7 +26,7 @@ build:
 test:
   stage: test
   image: $BUILD_IMAGE
-  coverage: Total[^|]*\|[^|]*\s+([\d\.]+)
+  coverage: /Total[^|]*\|[^|]*\s+([\d\.]+)/
   script:
     - cd tests/$PROJECT_NAME.Tests
     - dotnet test -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura
