@@ -23,7 +23,7 @@ build:
   tags:
     - segfy
 
-test:
+unit-test:
   stage: test
   image: $BUILD_IMAGE
   coverage: /Total[^|]*\|[^|]*\s+([\d\.]+)/
@@ -33,6 +33,19 @@ test:
   artifacts:
     reports:
       cobertura: ./tests/$PROJECT_NAME.Tests/coverage.cobertura.xml
+  tags:
+    - segfy
+
+integration-test:
+  stage: test
+  image: $BUILD_IMAGE
+  before_script:
+	  - docker-compose  -f docker-compose.test.yml up --build --detach
+  script:
+    - cd tests/$PROJECT_NAME.Tests.Integration
+    - dotnet test
+  after_script:
+	  - docker-compose down
   tags:
     - segfy
 
