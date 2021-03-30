@@ -40,7 +40,7 @@ integration-test:
   stage: test
   image: $BUILD_IMAGE
   before_script:
-    - docker-compose -f docker-compose.test.yml up --build --detach
+    - docker-compose up -f docker-compose.test.yml --force-recreate --build -d
   script:
     - cd tests/$PROJECT_NAME.Tests.Integration
     - dotnet test
