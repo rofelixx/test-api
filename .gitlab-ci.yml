@@ -45,7 +45,7 @@ integration-test:
     - cd tests/$PROJECT_NAME.Tests.Integration
     - dotnet test
   after_script:
-    - docker-compose down
+    - docker-compose down --remove-orphans --rmi all
   tags:
     - segfy
 
