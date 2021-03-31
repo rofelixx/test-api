@@ -42,7 +42,7 @@ integration-test:
   before_script:
     - curl -L "https://github.com/docker/compose/releases/download/1.28.6/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     - chmod +x /usr/local/bin/docker-compose
-    - docker-compose up -f docker-compose.test.yml --force-recreate --build -d
+    - docker-compose -f docker-compose.test.yml up --force-recreate --build -d
   script:
     - cd tests/$PROJECT_NAME.Tests.Integration
     - dotnet test
