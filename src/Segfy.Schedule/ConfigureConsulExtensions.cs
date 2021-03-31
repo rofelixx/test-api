@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.Configuration;
 using Winton.Extensions.Configuration.Consul;
 
@@ -8,7 +9,7 @@ namespace Segfy.Schedule
         public static IConfigurationBuilder AddConsulConfiguration(this IConfigurationBuilder configurationBuilder, IConfiguration configuration)
         {
             configurationBuilder.AddConsul(
-                    $"segfy_mais/pipe_vendas/front/appsettings.json",
+                    $"segfy_mais/schedule/api/appsettings.json",
                     options =>
                     {
                         options.ConsulConfigurationOptions = cco =>
