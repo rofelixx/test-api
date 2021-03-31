@@ -4,7 +4,9 @@ variables:
 
 stages:
   #- unit-test
+  - integration-prepare
   - integration-test
+  - integration-cleanup
   #- docker
 
 # unit-test:
@@ -21,7 +23,7 @@ stages:
 #     - segfy
 
 integration:prepare:
-  stage: integration-test
+  stage: integration-prepare
   script:
     - mkdir ./tests/dynamodb
     - docker-compose -f ./tests/docker-compose.test.yml up --force-recreate --build -d
@@ -34,14 +36,18 @@ integration:test:
   script:
     - cd tests/$PROJECT_NAME.Tests.Integration
     - dotnet test
+  needs:
+    - job: integration:prepare
   tags:
     - segfy
 
 integration:cleanup:
-  stage: integration-test
+  stage: integration-cleanup
   script:
     - docker-compose  -f ./tests/docker-compose.test.yml down --remove-orphans --rmi all
     - rm -rf ./tests/dynamodb
+  needs:
+    - job: integration:test
   tags:
     - segfy
 
