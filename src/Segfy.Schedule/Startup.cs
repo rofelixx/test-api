@@ -31,6 +31,8 @@ namespace Segfy.Schedule
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Segfy.Schedule", Version = "v1" });
             });
+
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -42,6 +44,13 @@ namespace Segfy.Schedule
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Segfy.Schedule v1"));
             }
+
+            app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .SetIsOriginAllowed(origin => true) 
+                .AllowCredentials());
+
 
             app.UseRouting();
 
