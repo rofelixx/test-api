@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime;
-using Segfy.Schedule.Infra.Repositories;
-using Segfy.Schedule.Model.Entities;
-using Segfy.Schedule.Model.ViewModels;
+using Segfy.Schedule.Tests.Integration.DynamoDB.Model;
 
-namespace Segfy.Schedule.Tests.Integration.Infra
+namespace Segfy.Schedule.Tests.Integration.DynamoDB
 {
     public class AmazonDynamoDbFixture : IDisposable
     {
@@ -45,7 +44,7 @@ namespace Segfy.Schedule.Tests.Integration.Infra
 
             createTableRequest.GlobalSecondaryIndexes.Add(globalindex);
             var createtask = DbClient.CreateTableAsync(createTableRequest);
-            createtask.Wait();
+            createtask.GetAwaiter().GetResult();
 
             var repo = new DummyTableRepository(DbClient);
             var enities = new List<DummyTableViewModel>();
@@ -92,9 +91,8 @@ namespace Segfy.Schedule.Tests.Integration.Infra
             }
 
             var taskAdded = repo.Add(enities);
-            taskAdded.Wait();
-
-            var arr = taskAdded.Result.ToArray();
+            var arr = taskAdded.GetAwaiter().GetResult().ToArray();
+            
             EntityForSingle = arr[0];
             EntityForUpdate = arr[1];
         }

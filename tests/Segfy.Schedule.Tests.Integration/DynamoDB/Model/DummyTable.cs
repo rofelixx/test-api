@@ -1,6 +1,7 @@
 using Amazon.DynamoDBv2.DataModel;
+using Segfy.Schedule.Model.Entities;
 
-namespace Segfy.Schedule.Model.Entities
+namespace Segfy.Schedule.Tests.Integration.DynamoDB.Model
 {
     [DynamoDBTable("dummy-table")]
     public class DummyTable : BaseEntity

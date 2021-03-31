@@ -1,15 +1,13 @@
 using System.Threading.Tasks;
-using Segfy.Schedule.Infra.Repositories;
-using Segfy.Schedule.Model.ViewModels;
 using Xunit;
-using Amazon.DynamoDBv2;
 using FluentAssertions;
 using System.Linq;
 using System.Collections.Generic;
-using Segfy.Schedule.Model.Entities;
 using System;
+using Segfy.Schedule.Tests.Integration.DynamoDB.Model;
+using Segfy.Schedule.Model.Filters;
 
-namespace Segfy.Schedule.Tests.Integration.Infra
+namespace Segfy.Schedule.Tests.Integration.DynamoDB
 {
     public class DummyTableRepositoryTests : IClassFixture<AmazonDynamoDbFixture>
     {
@@ -43,7 +41,7 @@ namespace Segfy.Schedule.Tests.Integration.Infra
         public async Task DummyTableRepository_Find()
         {
             var repo = new DummyTableRepository(fixture.DbClient);
-            var filter = new Model.Filters.Filter()
+            var filter = new Filter()
             {
                 Field = "dummy_index",
                 Value = "5753a917-18cb-4ccc-ac07-325e5a5da259"
@@ -62,25 +60,27 @@ namespace Segfy.Schedule.Tests.Integration.Infra
         }
 
         [Fact]
-        public async Task DummyTableRepository_Find_All()
+        public async Task DummyTableRepository_Find_All_Index()
         {
             var repo = new DummyTableRepository(fixture.DbClient);
-            var filter = new Model.Filters.Filter()
+            var filter = new Filter()
             {
                 Field = "dummy_index",
                 Value = "5753a917-18cb-4ccc-ac07-325e5a5da259"
             };
 
             var totalItems = new List<DummyTable>();
-            var items = await repo.Find(filter);
-            do
-            {
-                totalItems.AddRange(items.Items);
-                if (totalItems.Count > 10) break;
-                items = await repo.Find(filter, items.PaginationToken);
-            } while (!items.IsDone);
+            var items = await repo.Find("dummy_index", filter);
+            totalItems.AddRange(items.Items);
 
-            totalItems.Count().Should().Be(11);
+            while (!items.IsDone)
+            {
+                items = await repo.Find("dummy_index", filter, items.PaginationToken);
+                totalItems.AddRange(items.Items);
+            }
+
+            totalItems.GroupBy(x => x.Id).Count().Should().Be(50);
+            totalItems.Count().Should().Be(50);
         }
 
         [Fact]
@@ -103,7 +103,7 @@ namespace Segfy.Schedule.Tests.Integration.Infra
 
             var a = new DummyTableViewModel()
             {
-                DummyIndex = "15fe1829-0930-45b4-adc2-28d6ad8142d8",
+                DummyIndex = "5753a917-18cb-4ccc-ac07-325e5a5da259",
                 DummyInteger = 3,
                 Text = $"teste atualizado {randomNum}"
             };
