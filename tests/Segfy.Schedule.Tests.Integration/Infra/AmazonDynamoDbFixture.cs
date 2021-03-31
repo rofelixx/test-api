@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using Amazon.Runtime;
 using Segfy.Schedule.Infra.Repositories;
 using Segfy.Schedule.Model.Entities;
 using Segfy.Schedule.Model.ViewModels;
@@ -20,7 +21,10 @@ namespace Segfy.Schedule.Tests.Integration.Infra
         {
             var clientConfig = new AmazonDynamoDBConfig
             {
-                ServiceURL = "http://localhost:8000"
+                ServiceURL = "http://localhost:8000",
+                Timeout = TimeSpan.FromSeconds(10),
+                RetryMode = RequestRetryMode.Standard,
+                MaxErrorRetry = 3
             };
             DbClient = new AmazonDynamoDBClient(clientConfig);
 
