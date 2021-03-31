@@ -4,19 +4,8 @@ services:
     command: '-jar DynamoDBLocal.jar -sharedDb -optimizeDbBeforeStartup -dbPath ./data'
     image: 'amazon/dynamodb-local:latest'
     container_name: dynamodb-local-test
-    services:
-      - docker:dind
     ports:
       - '8000:8000'
     volumes:
       - './dynamodb:/home/dynamodblocal/data'
     working_dir: /home/dynamodblocal
-  dynamodb-admin:
-    image: aaronshaf/dynamodb-admin
-    container_name: dynamodb-admin-test
-    environment:
-      DYNAMO_ENDPOINT: http://dynamodb-local-test:8000
-    depends_on:
-      - dynamodb-local-test
-    ports:
-      - '8001:8001'
