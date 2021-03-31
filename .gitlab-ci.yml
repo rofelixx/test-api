@@ -28,7 +28,7 @@ integration:prepare:
     - mkdir ./tests/dynamodb
     - docker-compose -f ./tests/docker-compose.test.yml up --force-recreate --build -d
   tags:
-    - segfy
+    - segfy-bash
 
 integration:test:
   stage: integration-test
@@ -49,7 +49,7 @@ integration:cleanup:
   needs:
     - job: integration:test
   tags:
-    - segfy
+    - segfy-bash
 
 # docker-build:
 #   image: docker:latest
