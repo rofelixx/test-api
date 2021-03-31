@@ -4,6 +4,8 @@ services:
     command: '-jar DynamoDBLocal.jar -sharedDb -optimizeDbBeforeStartup -dbPath ./data'
     image: 'amazon/dynamodb-local:latest'
     container_name: dynamodb-local-test
+    services:
+      - docker:dind
     ports:
       - '8000:8000'
     volumes:
