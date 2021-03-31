@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Segfy.Schedule.Util;
 
 namespace Segfy.Schedule
 {
@@ -41,7 +44,18 @@ namespace Segfy.Schedule
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Segfy.Schedule", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo 
+                {
+                    Title = "Agendamento", 
+                    Description = "API global de tratamento de agendamentos", 
+                    Version = "v1"
+                });
+
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+
+                c.OperationFilter<XmlCommentsEscapeFilter>();
             });
 
             services.AddCors();
