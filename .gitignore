@@ -442,5 +442,5 @@ $RECYCLE.BIN/
 !.vscode/extensions.json
 
 .env
-./docker/dynamodb/
 dynamodb/shared-local-instance.db
+tests/dynamodb/shared-local-instance.db

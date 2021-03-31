@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8453269B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Segfy.Schedule.Tests", "tests\Segfy.Schedule.Tests\Segfy.Schedule.Tests.csproj", "{445B52C5-C3EB-446E-988E-89E9779D90A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Segfy.Schedule.Tests.Integration", "tests\Segfy.Schedule.Tests.Integration\Segfy.Schedule.Tests.Integration.csproj", "{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,10 +64,23 @@ Global
 		{445B52C5-C3EB-446E-988E-89E9779D90A6}.Release|x64.Build.0 = Release|Any CPU
 		{445B52C5-C3EB-446E-988E-89E9779D90A6}.Release|x86.ActiveCfg = Release|Any CPU
 		{445B52C5-C3EB-446E-988E-89E9779D90A6}.Release|x86.Build.0 = Release|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Debug|x64.Build.0 = Debug|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Debug|x86.Build.0 = Debug|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Release|x64.ActiveCfg = Release|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Release|x64.Build.0 = Release|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0ECC9B8F-C874-4F17-9998-509E7623EEBB} = {7F56F828-0E36-4D4A-B7AC-C110870B5EF1}
 		{C8408698-EA78-4402-BBFF-58DDE561D687} = {7F56F828-0E36-4D4A-B7AC-C110870B5EF1}
 		{445B52C5-C3EB-446E-988E-89E9779D90A6} = {8453269B-8CFA-484E-ABDD-A65EF7D8CCFA}
+		{02A9FD18-DA70-4F9A-99CB-91F9B708E3E7} = {8453269B-8CFA-484E-ABDD-A65EF7D8CCFA}
 	EndGlobalSection
 EndGlobal
