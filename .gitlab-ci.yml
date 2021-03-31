@@ -51,6 +51,7 @@ integration-test:
     - dotnet test
   after_script:
     - docker-compose  -f ./tests/docker-compose.test.yml down --remove-orphans --rmi all
+    - rm -rf ./tests/dynamodb
   tags:
     - segfy
 

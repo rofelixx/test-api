@@ -20,7 +20,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
         {
             var clientConfig = new AmazonDynamoDBConfig
             {
-                ServiceURL = "http://10.10.0.211:8000",
+                ServiceURL = "http://localhost:8000",
                 Timeout = TimeSpan.FromSeconds(10),
                 RetryMode = RequestRetryMode.Standard,
                 MaxErrorRetry = 3
