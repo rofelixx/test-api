@@ -1,0 +1,73 @@
+variables:
+  PROJECT_NAME: 'Segfy.Schedule'
+  BUILD_IMAGE: 'registry.gitlab.com/segfy/docker_images/build_dotnet/dotnet5:4.0.3'
+
+stages:
+  #- unit-test
+  - integration-prepare
+  - integration-test
+  - integration-cleanup
+  #- docker
+
+# unit-test:
+#   stage: unit-test
+#   image: $BUILD_IMAGE
+#   coverage: /Total[^|]*\|[^|]*\s+([\d\.]+)/
+#   script:
+#     - cd tests/$PROJECT_NAME.Tests
+#     - dotnet test -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura
+#   artifacts:
+#     reports:
+#       cobertura: ./tests/$PROJECT_NAME.Tests/coverage.cobertura.xml
+#   tags:
+#     - segfy
+
+integration:prepare:
+  stage: integration-prepare
+  script:
+    - docker-compose -f ./tests/docker-compose.test.yml up --force-recreate --build -d
+  tags:
+    - segfy-bash
+
+integration:test:
+  stage: integration-test
+  image: $BUILD_IMAGE
+  script:
+    - cd tests/$PROJECT_NAME.Tests.Integration
+    - dotnet test
+  needs:
+    - job: integration:prepare
+  tags:
+    - segfy
+
+integration:cleanup:
+  stage: integration-cleanup
+  script:
+    - docker-compose -f ./tests/docker-compose.test.yml down --remove-orphans --rmi all
+  needs:
+    - job: integration:test
+  tags:
+    - segfy-bash
+
+# docker-build:
+#   image: docker:latest
+#   stage: docker
+#   services:
+#     - docker:dind
+#   before_script:
+#     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+#   script:
+#     - |
+#       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+#         tag=""
+#         echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
+#       else
+#         tag=":$CI_COMMIT_REF_SLUG"
+#         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+#       fi
+#     - docker build -f "./src/$PROJECT_NAME/Dockerfile" --pull -t "$CI_REGISTRY_IMAGE${tag}" .
+#     - docker push "$CI_REGISTRY_IMAGE${tag}"
+#   rules:
+#     - if: $CI_COMMIT_BRANCH
+#   tags:
+#     - segfy

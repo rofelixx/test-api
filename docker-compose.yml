@@ -1,0 +1,13 @@
+version: '3.4'
+services:
+  segfyschedule:
+    image: segfyschedule
+    build:
+      context: .
+      dockerfile: src/Segfy.Schedule/Dockerfile
+    environment:
+      AWS_ACCESS_KEY_ID: '${AWS_ACCESS_KEY_ID}'
+      AWS_SECRET_ACCESS_KEY: '${AWS_SECRET_ACCESS_KEY}'
+      REGION: '${AWS_REGION}'
+    ports:
+      - 5050
