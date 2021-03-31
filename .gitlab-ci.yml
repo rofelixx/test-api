@@ -25,7 +25,8 @@ stages:
 integration:prepare:
   stage: integration-prepare
   script:
-    - mkdir ./tests/dynamodb
+    - mkdir $CI_PROJECT_DIR/dynamodb
+    - sed -i "s/__CI_PROJECT_DIR__/$CI_PROJECT_DIR/g" ./tests/docker-compose.test.yml
     - docker-compose -f ./tests/docker-compose.test.yml up --force-recreate --build -d
   tags:
     - segfy-bash
@@ -44,8 +45,8 @@ integration:test:
 integration:cleanup:
   stage: integration-cleanup
   script:
-    - docker-compose  -f ./tests/docker-compose.test.yml down --remove-orphans --rmi all
-    - rm -rf ./tests/dynamodb
+    - docker-compose -f ./tests/docker-compose.test.yml down --remove-orphans --rmi all
+    - rm -rf $CI_PROJECT_DIR/dynamodb
   needs:
     - job: integration:test
   tags:

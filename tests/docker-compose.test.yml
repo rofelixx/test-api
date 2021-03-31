@@ -7,3 +7,5 @@ services:
     ports:
       - '8000:8000'
     working_dir: /home/dynamodblocal
+    volumes:
+      - '__CI_PROJECT_DIR__/dynamodb:/home/dynamodblocal/data'
