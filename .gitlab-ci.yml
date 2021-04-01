@@ -25,10 +25,9 @@ stages:
 integration:prepare:
   stage: integration-prepare
   script:
-    - mkdir ./tests/dynamodb
     - docker-compose -f ./tests/docker-compose.test.yml up --force-recreate --build -d
   tags:
-    - segfy
+    - segfy-bash
 
 integration:test:
   stage: integration-test
@@ -44,12 +43,11 @@ integration:test:
 integration:cleanup:
   stage: integration-cleanup
   script:
-    - docker-compose  -f ./tests/docker-compose.test.yml down --remove-orphans --rmi all
-    - rm -rf ./tests/dynamodb
+    - docker-compose -f ./tests/docker-compose.test.yml down --remove-orphans --rmi all
   needs:
     - job: integration:test
   tags:
-    - segfy
+    - segfy-bash
 
 # docker-build:
 #   image: docker:latest
