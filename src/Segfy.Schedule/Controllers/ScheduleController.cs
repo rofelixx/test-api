@@ -6,6 +6,7 @@ using System.Linq;
 using System;
 using Segfy.Schedule.Model.Filters;
 using Segfy.Schedule.Model.Dtos;
+using System.Threading.Tasks;
 
 namespace Segfy.Schedule.Controllers
 {
@@ -36,7 +37,7 @@ namespace Segfy.Schedule.Controllers
         [ProducesResponseType(typeof(DynamoDBPagedRequest<ScheduleItemDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public IActionResult Get([FromQuery] FilterData filter)
+        public async Task<IActionResult> Get([FromQuery] FilterData filter)
         {
             var items = Enumerable.Range(1, 5).Select(index => new ScheduleItemDto
             {
@@ -57,7 +58,7 @@ namespace Segfy.Schedule.Controllers
         /// <summary>
         /// Retorna um agendamento pelo id
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">Use um uuid guid</param>
         /// <response code="200">Retorna a lista paginada de agendamentos</response>
         /// <response code="400">Algum erro relativo a validação</response>
         /// <response code="500">Algum erro interno não tratado no servidor</response>
@@ -66,7 +67,7 @@ namespace Segfy.Schedule.Controllers
         [ProducesResponseType(typeof(ScheduleItemDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public IActionResult GetOne(Guid id)
+        public async Task<IActionResult> GetOne(Guid id)
         {
             return Ok(new ScheduleItemDto
             {
@@ -89,22 +90,35 @@ namespace Segfy.Schedule.Controllers
         /// <response code="400">Algum erro relativo a validação</response>
         /// <response code="500">Algum erro interno não tratado no servidor</response>
         [HttpPost]
-        public IActionResult Post([FromBody] ScheduleItemDto item)
+        public async Task<IActionResult> Post([FromBody] ScheduleItemDto item)
         {
             return Ok(item);
         }
 
         /// <summary>
-        /// Atualiza e retorna o agendamento atualizado
+        /// Atualiza um agendamento
         /// </summary>
         /// <param name="item"></param>
-        /// <response code="200">Retorna o agendamento salvo</response>
+        /// <response code="204">Retorna o padrão "No content" para o update</response>
         /// <response code="400">Algum erro relativo a validação</response>
         /// <response code="500">Algum erro interno não tratado no servidor</response>
         [HttpPut]
-        public IActionResult Put([FromBody] ScheduleItemDto item)
+        public async Task<IActionResult> Put([FromBody] ScheduleItemDto item)
         {
-            return Ok(item);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Remove um agendamento
+        /// </summary>
+        /// <param name="id">Use um uuid guid</param>
+        /// <response code="204">Retorna o padrão "No content" para o delete</response>
+        /// <response code="400">Algum erro relativo a validação</response>
+        /// <response code="500">Algum erro interno não tratado no servidor</response>
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            return NoContent();
         }
     }
 }

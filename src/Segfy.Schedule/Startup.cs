@@ -15,6 +15,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Segfy.Schedule.Util;
 using Segfy.Schedule.Filters;
+using Microsoft.AspNetCore.Mvc.Razor;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Localization.Routing;
+using Microsoft.Extensions.Options;
 
 namespace Segfy.Schedule
 {
@@ -43,6 +48,23 @@ namespace Segfy.Schedule
             });
 
             services.AddControllers();
+
+
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+            services.Configure<RequestLocalizationOptions>(
+                options =>
+                {
+                    var supportedCultures = new List<CultureInfo>
+                    {
+                        new CultureInfo("pt-BR")
+                    };
+
+                    options.DefaultRequestCulture = new RequestCulture(culture: "pt-BR", uiCulture: "pt-BR");
+                    options.SupportedCultures = supportedCultures;
+                    options.SupportedUICultures = supportedCultures;
+                    options.RequestCultureProviders = new[] { new RouteDataRequestCultureProvider() };
+                });
 
             services.AddMvc(options =>
             {
@@ -87,7 +109,6 @@ namespace Segfy.Schedule
                 .AllowAnyHeader()
                 .SetIsOriginAllowed(origin => true) 
                 .AllowCredentials());
-
 
             app.UseRouting();
 
