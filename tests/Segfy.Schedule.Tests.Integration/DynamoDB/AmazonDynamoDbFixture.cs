@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime;
 using Segfy.Schedule.Tests.Integration.DynamoDB.Model;
@@ -10,16 +11,22 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
 {
     public class AmazonDynamoDbFixture : IDisposable
     {
-        public AmazonDynamoDBClient DbClient { get; private set; }
+        public IAmazonDynamoDB DbClient { get; private set; }
+        public IDynamoDBContext DbContext { get; private set; }
 
         public DummyTable EntityForSingle { get; set; }
         public DummyTable EntityForUpdate { get; set; }
 
         public AmazonDynamoDbFixture()
         {
+            var url = Environment.GetEnvironmentVariable("TEST_DYNAMODB_URL");
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                url = "http://localhost:8000";
+            }
             var clientConfig = new AmazonDynamoDBConfig
             {
-                ServiceURL = "http://10.10.0.211:8000",
+                ServiceURL = url,
                 Timeout = TimeSpan.FromSeconds(10),
                 RetryMode = RequestRetryMode.Standard,
                 MaxErrorRetry = 3
@@ -46,7 +53,8 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
             var createtask = DbClient.CreateTableAsync(createTableRequest);
             createtask.GetAwaiter().GetResult();
 
-            var repo = new DummyTableRepository(DbClient);
+            DbContext = new DynamoDBContext(DbClient);
+            var repo = new DummyTableRepository(DbContext);
             var enities = new List<DummyTable>();
             for (int i = 0; i < 50; i++)
             {

@@ -9,25 +9,13 @@ using Segfy.Schedule.Model.Pagination;
 
 namespace Segfy.Schedule.Infra.Repositories.Base
 {
-    public abstract class TableRepository<T> : ITableRepository<T, Model.Filters.Filter> where T : BaseEntity
+    public class TableRepository<T> : ITableRepository<T, Model.Filters.Filter> where T : BaseEntity
     {
-        protected readonly DynamoDBContext _context;
+        protected readonly IDynamoDBContext _context;
 
-        public TableRepository(IAmazonDynamoDB client)
+        public TableRepository(IDynamoDBContext context)
         {
-            _context = new DynamoDBContext(client);
-        }
-
-        protected virtual Task<T> HydrateEntityForCreation(T entity)
-        {
-            entity.Id = Guid.NewGuid();
-            entity.CreatedAt = DateTime.UtcNow;
-            return Task.FromResult(entity);
-        }
-        protected virtual Task<T> HydratateEntityForUpdate(T entity)
-        {
-            entity.UpdatedAt = DateTime.UtcNow;
-            return Task.FromResult(entity);
+            _context = context;
         }
 
         public async Task<T> Add(T entity)
@@ -138,5 +126,18 @@ namespace Segfy.Schedule.Infra.Repositories.Base
                 IsDone = results.IsDone,
             };
         }
+
+        protected virtual Task<T> HydrateEntityForCreation(T entity)
+        {
+            entity.Id = Guid.NewGuid();
+            entity.CreatedAt = DateTime.UtcNow;
+            return Task.FromResult(entity);
+        }
+        protected virtual Task<T> HydratateEntityForUpdate(T entity)
+        {
+            entity.UpdatedAt = DateTime.UtcNow;
+            return Task.FromResult(entity);
+        }
+
     }
 }

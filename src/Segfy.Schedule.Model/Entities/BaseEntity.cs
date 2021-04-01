@@ -11,10 +11,10 @@ namespace Segfy.Schedule.Model.Entities
         [DynamoDBRangeKey("id")]
         public Guid Id { get; set; }
         
-        [DynamoDBRangeKey("created_at")]
+        [DynamoDBProperty("created_at")]
         public DateTime? CreatedAt { get; set; }
         
-        [DynamoDBRangeKey("updated_at")]
+        [DynamoDBProperty("updated_at")]
         public DateTime? UpdatedAt { get; set; }
     }
 }

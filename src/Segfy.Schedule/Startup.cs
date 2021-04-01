@@ -33,18 +33,11 @@ namespace Segfy.Schedule
         {
             services.Configure<AppConfiguration>(Configuration.GetSection("AppConfiguration"));
 
-            services.AddSingleton<IAmazonDynamoDB>(sp =>
-            {
-                var config = sp.GetRequiredService<IOptions<AppConfiguration>>();
-                var clientConfig = new AmazonDynamoDBConfig
-                {
-                    ServiceURL = config.Value.DynamoDbUrl
-                };
-                return new AmazonDynamoDBClient(clientConfig);
-            });
             services.AddControllers();
-            
+
+            services.AddDynamoDB();
             services.AddRepositories();
+
             services.AddMediatR(typeof(IScheduleRepository));
 
             services.AddSwaggerGen(c =>

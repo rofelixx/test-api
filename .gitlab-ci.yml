@@ -39,8 +39,9 @@ integration:test:
   <<: *integration-rules
   image: $BUILD_IMAGE
   script:
+    - export TEST_DYNAMODB_URL=http://10.10.0.211:8000
     - cd tests/$PROJECT_NAME.Tests.Integration
-    - dotnet test
+    - dotnet test    
   needs:
     - job: integration:prepare
   tags:
