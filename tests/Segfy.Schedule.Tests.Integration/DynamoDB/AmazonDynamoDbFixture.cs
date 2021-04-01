@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime;
@@ -48,10 +47,10 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
             createtask.GetAwaiter().GetResult();
 
             var repo = new DummyTableRepository(DbClient);
-            var enities = new List<DummyTableViewModel>();
+            var enities = new List<DummyTable>();
             for (int i = 0; i < 50; i++)
             {
-                var a = new DummyTableViewModel()
+                var a = new DummyTable()
                 {
                     DummyIndex = "5753a917-18cb-4ccc-ac07-325e5a5da259",
                     DummyInteger = 1,
@@ -68,7 +67,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
                 {
                     index = Guid.NewGuid().ToString();
                 }
-                var a = new DummyTableViewModel()
+                var a = new DummyTable()
                 {
                     DummyIndex = index,
                     DummyInteger = 2,
@@ -81,7 +80,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
 
             for (int i = 0; i < 10; i++)
             {
-                var a = new DummyTableViewModel()
+                var a = new DummyTable()
                 {
                     DummyIndex = Guid.NewGuid().ToString(),
                     DummyInteger = 3,
@@ -93,7 +92,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
 
             var taskAdded = repo.Add(enities);
             var arr = taskAdded.GetAwaiter().GetResult().ToArray();
-            
+
             EntityForSingle = arr[0];
             EntityForUpdate = arr[1];
         }

@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Segfy.Schedule.Infra.Repositories;
 using Segfy.Schedule.Model.Configuration;
 
 namespace Segfy.Schedule
@@ -40,8 +42,11 @@ namespace Segfy.Schedule
                 };
                 return new AmazonDynamoDBClient(clientConfig);
             });
-
             services.AddControllers();
+            
+            services.AddRepositories();
+            services.AddMediatR(typeof(IScheduleRepository));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Segfy.Schedule", Version = "v1" });

@@ -101,14 +101,16 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
             var repo = new DummyTableRepository(fixture.DbClient);
             var randomNum = new Random().Next();
 
-            var a = new DummyTableViewModel()
+            var a = new DummyTable()
             {
+                Id = fixture.EntityForUpdate.Id,
+                SubscriptionId = fixture.EntityForUpdate.SubscriptionId,
                 DummyIndex = "5753a917-18cb-4ccc-ac07-325e5a5da259",
                 DummyInteger = 3,
                 Text = $"teste atualizado {randomNum}"
             };
 
-            await repo.Update(fixture.EntityForUpdate.SubscriptionId, fixture.EntityForUpdate.Id, a);
+            await repo.Update(a);
 
             var items = await repo.Single(fixture.EntityForUpdate.SubscriptionId, fixture.EntityForUpdate.Id);
 

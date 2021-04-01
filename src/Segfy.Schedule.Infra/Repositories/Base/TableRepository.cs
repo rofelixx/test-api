@@ -7,9 +7,9 @@ using Amazon.DynamoDBv2.DocumentModel;
 using Segfy.Schedule.Model.Entities;
 using Segfy.Schedule.Model.Pagination;
 
-namespace Segfy.Schedule.Infra.Repositories
+namespace Segfy.Schedule.Infra.Repositories.Base
 {
-    public abstract class TableRepository<T, VM> : ITableRepository<T, VM, Model.Filters.Filter> where T : BaseEntity
+    public abstract class TableRepository<T> : ITableRepository<T, Model.Filters.Filter> where T : BaseEntity
     {
         protected readonly DynamoDBContext _context;
 
@@ -18,17 +18,26 @@ namespace Segfy.Schedule.Infra.Repositories
             _context = new DynamoDBContext(client);
         }
 
-        protected abstract Task<T> HydrateEntityForCreation(VM viewModel);
-        protected abstract Task<T> HydratateEntityForUpdate(Guid hashid, Guid sortid, VM entity);
+        protected virtual Task<T> HydrateEntityForCreation(T entity)
+        {
+            entity.Id = Guid.NewGuid();
+            entity.CreatedAt = DateTime.UtcNow;
+            return Task.FromResult(entity);
+        }
+        protected virtual Task<T> HydratateEntityForUpdate(T entity)
+        {
+            entity.UpdatedAt = DateTime.UtcNow;
+            return Task.FromResult(entity);
+        }
 
-        public async Task<T> Add(VM entity)
+        public async Task<T> Add(T entity)
         {
             var added = await HydrateEntityForCreation(entity);
             await _context.SaveAsync<T>(added);
             return added;
         }
 
-        public async Task<IEnumerable<T>> Add(IEnumerable<VM> entities)
+        public async Task<IEnumerable<T>> Add(IEnumerable<T> entities)
         {
             var dummies = new List<T>();
             foreach (var item in entities)
@@ -89,9 +98,9 @@ namespace Segfy.Schedule.Infra.Repositories
             return _context.LoadAsync<T>(hashid, sortid);
         }
 
-        public async Task<T> Update(Guid hashid, Guid sortid, VM entity)
+        public async Task<T> Update(T entity)
         {
-            var item = await HydratateEntityForUpdate(hashid, sortid, entity);
+            var item = await HydratateEntityForUpdate(entity);
 
             await _context.SaveAsync<T>(item);
             return item;
