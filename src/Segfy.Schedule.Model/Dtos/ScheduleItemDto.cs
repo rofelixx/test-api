@@ -1,17 +1,17 @@
 ﻿using Segfy.Schedule.Model.Enuns;
 using System;
 
-namespace Segfy.Schedule.Model.Entities
+namespace Segfy.Schedule.Model.Dtos
 {
-    public class ScheduleItem : BaseEntity
+    public class ScheduleItemDto : BaseDto
     {
         public string Kind { get; set; }
 
         public string Description { get; set; }
 
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
 
-        public Recurrence Recurrence { get; set; }
+        public Recurrence? Recurrence { get; set; }
 
         public Guid InsuredId { get; set; }
 

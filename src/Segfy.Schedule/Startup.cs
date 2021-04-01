@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
+using FluentValidation.AspNetCore;
 using Amazon.DynamoDBv2;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Segfy.Schedule.Util;
+using Segfy.Schedule.Filters;
 
 namespace Segfy.Schedule
 {
@@ -42,6 +43,16 @@ namespace Segfy.Schedule
             });
 
             services.AddControllers();
+
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(new ValidationFilter());
+            })
+            .AddFluentValidation(options =>
+            {
+                options.RegisterValidatorsFromAssemblyContaining<Startup>();
+            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo 
