@@ -24,9 +24,7 @@ unit-test:
 
 .integration-rules: &integration-rules
   rules:
-  - when: never
   - if: $CI_COMMIT_BRANCH == "qa"
-    when: on_success 
 
 integration:prepare:
   stage: integration-prepare
