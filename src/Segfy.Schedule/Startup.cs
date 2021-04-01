@@ -7,11 +7,10 @@ using FluentValidation.AspNetCore;
 using Amazon.DynamoDBv2;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Segfy.Schedule.Util;
 using Segfy.Schedule.Filters;
@@ -20,14 +19,22 @@ using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.Extensions.Options;
+using Segfy.Schedule.Model.Configuration;
 
 namespace Segfy.Schedule
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddConsulConfiguration(configuration);
+
+            Configuration = builder.Build();
+
         }
 
         public IConfiguration Configuration { get; }
@@ -35,14 +42,14 @@ namespace Segfy.Schedule
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var dynamoDbConfig = Configuration.GetSection("DynamoDb");
-            var runLocalDynamoDb = dynamoDbConfig.GetValue<bool>("LocalMode");
+            services.Configure<AppConfiguration>(Configuration.GetSection("AppConfiguration"));
 
             services.AddSingleton<IAmazonDynamoDB>(sp =>
             {
+                var config = sp.GetRequiredService<IOptions<AppConfiguration>>();
                 var clientConfig = new AmazonDynamoDBConfig
                 {
-                    ServiceURL = dynamoDbConfig.GetValue<string>("LocalServiceUrl")
+                    ServiceURL = config.Value.DynamoDbUrl
                 };
                 return new AmazonDynamoDBClient(clientConfig);
             });
