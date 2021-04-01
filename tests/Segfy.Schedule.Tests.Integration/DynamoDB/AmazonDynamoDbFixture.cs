@@ -25,7 +25,8 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
                 RetryMode = RequestRetryMode.Standard,
                 MaxErrorRetry = 3
             };
-            DbClient = new AmazonDynamoDBClient(clientConfig);
+            var credentials = new BasicAWSCredentials("xxx", "xxx");
+            DbClient = new AmazonDynamoDBClient(credentials, clientConfig);
 
             var createTableRequest = new CreateTableRequest();
             createTableRequest.TableName = "dummy-table";
