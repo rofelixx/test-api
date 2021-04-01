@@ -3,27 +3,34 @@ variables:
   BUILD_IMAGE: 'registry.gitlab.com/segfy/docker_images/build_dotnet/dotnet5:4.0.3'
 
 stages:
-  #- unit-test
+  - unit-test
   - integration-prepare
   - integration-test
   - integration-cleanup
-  #- docker
+  - docker
 
-# unit-test:
-#   stage: unit-test
-#   image: $BUILD_IMAGE
-#   coverage: /Total[^|]*\|[^|]*\s+([\d\.]+)/
-#   script:
-#     - cd tests/$PROJECT_NAME.Tests
-#     - dotnet test -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura
-#   artifacts:
-#     reports:
-#       cobertura: ./tests/$PROJECT_NAME.Tests/coverage.cobertura.xml
-#   tags:
-#     - segfy
+unit-test:
+  stage: unit-test
+  image: $BUILD_IMAGE
+  coverage: /Total[^|]*\|[^|]*\s+([\d\.]+)/
+  script:
+    - cd tests/$PROJECT_NAME.Tests
+    - dotnet test -p:CollectCoverage=true -p:CoverletOutputFormat=cobertura
+  artifacts:
+    reports:
+      cobertura: ./tests/$PROJECT_NAME.Tests/coverage.cobertura.xml
+  tags:
+    - segfy
+
+.integration-rules: &integration-rules
+  rules:
+  - when: never
+  - if: $CI_COMMIT_BRANCH == "qa"
+    when: on_success 
 
 integration:prepare:
   stage: integration-prepare
+  <<: *integration-rules
   script:
     - docker-compose -f ./tests/docker-compose.test.yml up --force-recreate --build -d
   tags:
@@ -31,6 +38,7 @@ integration:prepare:
 
 integration:test:
   stage: integration-test
+  <<: *integration-rules
   image: $BUILD_IMAGE
   script:
     - cd tests/$PROJECT_NAME.Tests.Integration
@@ -42,6 +50,7 @@ integration:test:
 
 integration:cleanup:
   stage: integration-cleanup
+  <<: *integration-rules
   script:
     - docker-compose -f ./tests/docker-compose.test.yml down --remove-orphans --rmi all
   needs:
@@ -49,25 +58,27 @@ integration:cleanup:
   tags:
     - segfy-bash
 
-# docker-build:
-#   image: docker:latest
-#   stage: docker
-#   services:
-#     - docker:dind
-#   before_script:
-#     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
-#   script:
-#     - |
-#       if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
-#         tag=""
-#         echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
-#       else
-#         tag=":$CI_COMMIT_REF_SLUG"
-#         echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
-#       fi
-#     - docker build -f "./src/$PROJECT_NAME/Dockerfile" --pull -t "$CI_REGISTRY_IMAGE${tag}" .
-#     - docker push "$CI_REGISTRY_IMAGE${tag}"
-#   rules:
-#     - if: $CI_COMMIT_BRANCH
-#   tags:
-#     - segfy
+docker-build:
+  image: docker:latest
+  stage: docker
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        tag=""
+        echo "Running on default branch '$CI_DEFAULT_BRANCH': tag = 'latest'"
+      else
+        tag=":$CI_COMMIT_REF_SLUG"
+        echo "Running on branch '$CI_COMMIT_BRANCH': tag = $tag"
+      fi
+    - docker build -f "./src/$PROJECT_NAME/Dockerfile" --pull -t "$CI_REGISTRY_IMAGE${tag}" .
+    - docker push "$CI_REGISTRY_IMAGE${tag}"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+    - if: $CI_COMMIT_BRANCH == "qa"
+    - if: $CI_COMMIT_TAG != null
+  tags:
+    - segfy
