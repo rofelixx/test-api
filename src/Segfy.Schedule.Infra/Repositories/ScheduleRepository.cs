@@ -1,12 +1,12 @@
 using Segfy.Schedule.Model.Entities;
 using Segfy.Schedule.Infra.Repositories.Base;
-using Amazon.DynamoDBv2.DataModel;
+using Segfy.Schedule.Infra.Operations;
 
 namespace Segfy.Schedule.Infra.Repositories
 {
     public class ScheduleRepository : TableRepository<ScheduleEntity>, IScheduleRepository
     {
-        public ScheduleRepository(IDynamoDBContext context) : base(context)
+        public ScheduleRepository(IDynamoBDOperations<ScheduleEntity> context) : base(context)
         {
         }
     }

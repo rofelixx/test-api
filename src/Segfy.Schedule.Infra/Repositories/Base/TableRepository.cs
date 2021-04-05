@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Amazon.DynamoDBv2;
-using Amazon.DynamoDBv2.DataModel;
-using Amazon.DynamoDBv2.DocumentModel;
+using Segfy.Schedule.Infra.Operations;
 using Segfy.Schedule.Model.Entities;
 using Segfy.Schedule.Model.Pagination;
 
@@ -11,9 +9,9 @@ namespace Segfy.Schedule.Infra.Repositories.Base
 {
     public class TableRepository<T> : ITableRepository<T, Model.Filters.Filter> where T : BaseEntity
     {
-        protected readonly IDynamoDBContext _context;
+        protected readonly IDynamoBDOperations<T> _context;
 
-        public TableRepository(IDynamoDBContext context)
+        public TableRepository(IDynamoBDOperations<T> context)
         {
             _context = context;
         }
@@ -21,7 +19,7 @@ namespace Segfy.Schedule.Infra.Repositories.Base
         public async Task<T> Add(T entity)
         {
             var added = await HydrateEntityForCreation(entity);
-            await _context.SaveAsync<T>(added);
+            await _context.SaveAsync(added);
             return added;
         }
 
@@ -33,42 +31,18 @@ namespace Segfy.Schedule.Infra.Repositories.Base
                 dummies.Add(await HydrateEntityForCreation(item));
             }
 
-            var batch = _context.CreateBatchWrite<T>();
-            batch.AddPutItems(dummies);
-            await batch.ExecuteAsync();
+            await _context.SaveAsync(dummies);
             return dummies;
         }
 
-        public async Task<DynamoDBPagedRequest<T>> All(string paginationToken = "")
+        public Task<DynamoDBPagedRequest<T>> All(string paginationToken = "")
         {
-            var table = _context.GetTargetTable<T>();
-
-            var scanOps = new ScanOperationConfig() { Limit = 25 };
-            if (!string.IsNullOrEmpty(paginationToken))
+            var parameters = new ScanParameters()
             {
-                scanOps.PaginationToken = paginationToken;
-            }
-
-            // returns the set of Document objects
-            // for the supplied ScanOptions
-            var results = table.Scan(scanOps);
-            List<Document> data = await results.GetNextSetAsync();
-
-            // transform the generic Document objects
-            // into our Entity Model
-            var items = _context.FromDocuments<T>(data);
-
-            // Pass the PaginationToken
-            // if available from the Results
-            // along with the Result set
-            return new DynamoDBPagedRequest<T>
-            {
-                PaginationToken = results.PaginationToken,
-                Items = items,
-                Segment = results.Segment,
-                TotalSegments = results.TotalSegments,
-                IsDone = results.IsDone,
+                PaginationToken = paginationToken,
+                PerPage = 25,
             };
+            return _context.ScanAsync(parameters);
         }
 
         public Task<DynamoDBPagedRequest<T>> Find(Model.Filters.Filter searchReq, string paginationToken = "")
@@ -78,53 +52,32 @@ namespace Segfy.Schedule.Infra.Repositories.Base
 
         public Task Remove(Guid hashid, Guid sortid)
         {
-            return _context.DeleteAsync<T>(hashid, sortid);
+            return _context.DeleteAsync(hashid, sortid);
         }
 
         public Task<T> Single(Guid hashid, Guid sortid)
         {
-            return _context.LoadAsync<T>(hashid, sortid);
+            return _context.LoadAsync(hashid, sortid);
         }
 
         public async Task<T> Update(T entity)
         {
             var item = await HydratateEntityForUpdate(entity);
 
-            await _context.SaveAsync<T>(item);
+            await _context.SaveAsync(item);
             return item;
         }
 
-        public async Task<DynamoDBPagedRequest<T>> Find(string indexName, Model.Filters.Filter searchReq, string paginationToken = "")
+        public Task<DynamoDBPagedRequest<T>> Find(string indexName, Model.Filters.Filter searchReq, string paginationToken = "")
         {
-            var table = _context.GetTargetTable<T>();
-
-            ScanFilter scanFilter = new ScanFilter();
-            if (!string.IsNullOrEmpty(searchReq.Field))
-                scanFilter.AddCondition(searchReq.Field, ScanOperator.Equal, searchReq.Value);
-
-            var scanOps = new ScanOperationConfig() { Limit = 20, Filter = scanFilter };
-            if (!string.IsNullOrWhiteSpace(indexName))
+            var parameters = new ScanParameters()
             {
-                scanOps.IndexName = indexName;
-            }
-
-            if (!string.IsNullOrEmpty(paginationToken))
-            {
-                scanOps.PaginationToken = paginationToken;
-            }
-
-            var results = table.Scan(scanOps);
-            List<Document> data = await results.GetNextSetAsync();
-            var items = _context.FromDocuments<T>(data);
-
-            return new DynamoDBPagedRequest<T>
-            {
-                PaginationToken = results.PaginationToken,
-                Items = items,
-                Segment = results.Segment,
-                TotalSegments = results.TotalSegments,
-                IsDone = results.IsDone,
+                Filters = new List<Model.Filters.Filter>() { searchReq },
+                IndexName = indexName,
+                PaginationToken = paginationToken,
+                PerPage = 25,
             };
+            return _context.ScanAsync(parameters);
         }
 
         protected virtual Task<T> HydrateEntityForCreation(T entity)
@@ -133,6 +86,7 @@ namespace Segfy.Schedule.Infra.Repositories.Base
             entity.CreatedAt = DateTime.UtcNow;
             return Task.FromResult(entity);
         }
+
         protected virtual Task<T> HydratateEntityForUpdate(T entity)
         {
             entity.UpdatedAt = DateTime.UtcNow;

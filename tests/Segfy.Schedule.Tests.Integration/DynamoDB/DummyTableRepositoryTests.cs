@@ -21,7 +21,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
         [Fact]
         public async Task DummyTableRepository_All()
         {
-            var repo = new DummyTableRepository(fixture.DbContext);
+            var repo = new DummyTableRepository(fixture.DbOperations);
             var items = await repo.All();
 
             items.Should().NotBeNull();
@@ -40,7 +40,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
         [Fact]
         public async Task DummyTableRepository_Find()
         {
-            var repo = new DummyTableRepository(fixture.DbContext);
+            var repo = new DummyTableRepository(fixture.DbOperations);
             var filter = new Filter()
             {
                 Field = "dummy_index",
@@ -62,7 +62,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
         [Fact]
         public async Task DummyTableRepository_Find_All_Index()
         {
-            var repo = new DummyTableRepository(fixture.DbContext);
+            var repo = new DummyTableRepository(fixture.DbOperations);
             var filter = new Filter()
             {
                 Field = "dummy_index",
@@ -86,7 +86,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
         [Fact]
         public async Task DummyTableRepository_Single()
         {
-            var repo = new DummyTableRepository(fixture.DbContext);
+            var repo = new DummyTableRepository(fixture.DbOperations);
 
             var items = await repo.Single(fixture.EntityForSingle.SubscriptionId, fixture.EntityForSingle.Id);
             items.Should().NotBeNull();
@@ -98,7 +98,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
         [Fact]
         public async Task DummyTableRepository_Update()
         {
-            var repo = new DummyTableRepository(fixture.DbContext);
+            var repo = new DummyTableRepository(fixture.DbOperations);
             var randomNum = new Random().Next();
 
             var a = new DummyTable()
