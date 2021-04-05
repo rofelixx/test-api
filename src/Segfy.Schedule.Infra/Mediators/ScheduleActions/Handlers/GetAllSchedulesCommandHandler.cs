@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -8,21 +9,21 @@ using Segfy.Schedule.Model.Dtos;
 
 namespace Segfy.Schedule.Infra.Mediators.ScheduleActions.Handlers
 {
-    public class GetScheduleCommandHandler : IRequestHandler<GetScheduleCommand, ScheduleItemDto>
+    public class GetAllSchedulesCommandHandler : IRequestHandler<GetAllSchedulesCommand, IEnumerable<ScheduleItemDto>>
     {
         private readonly IScheduleRepository _repository;
         private readonly IMapper _mapper;
 
-        public GetScheduleCommandHandler(IScheduleRepository repository, IMapper mapper)
+        public GetAllSchedulesCommandHandler(IScheduleRepository repository, IMapper mapper)
         {
             this._repository = repository;
             this._mapper = mapper;
         }
 
-        public async Task<ScheduleItemDto> Handle(GetScheduleCommand request, CancellationToken cancellationToken)
+        public async Task<IEnumerable<ScheduleItemDto>> Handle(GetAllSchedulesCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _repository.Single(request.SubscriptionId, request.Id);
-            var response = _mapper.Map<ScheduleItemDto>(entity);
+            var entity = await _repository.Find(request.SubscriptionId);
+            var response = _mapper.Map<IEnumerable<ScheduleItemDto>>(entity.Items);
 
             return response;
         }

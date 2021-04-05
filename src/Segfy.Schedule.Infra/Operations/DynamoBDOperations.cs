@@ -88,5 +88,32 @@ namespace Segfy.Schedule.Infra.Operations
                 IsDone = results.IsDone,
             };
         }
+
+        public async Task<DynamoDBPagedRequest<T>> QueryAsync(QueryParameters parameters)
+        {
+            var table = _context.GetTargetTable<T>();
+
+            var filter = new QueryFilter();
+            filter.AddCondition("subscription_id", QueryOperator.Equal, parameters.HashKey);
+            var config = new QueryOperationConfig() { Filter = filter };
+
+            if (!string.IsNullOrWhiteSpace(parameters.PaginationToken))
+            {
+                config.PaginationToken = parameters.PaginationToken;
+            }
+
+            var results = table.Query(config);
+            List<Document> data = await results.GetNextSetAsync();
+
+            var items = _context.FromDocuments<T>(data);
+            return new DynamoDBPagedRequest<T>
+            {
+                PaginationToken = results.PaginationToken,
+                Items = items,
+                Segment = results.Segment,
+                TotalSegments = results.TotalSegments,
+                IsDone = results.IsDone,
+            };
+        }
     }
 }

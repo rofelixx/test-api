@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
+using AutoWrapper;
 using FluentValidation.AspNetCore;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
@@ -9,12 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using Segfy.Schedule.Util;
+using Segfy.Schedule.Extensions;
 using Segfy.Schedule.Filters;
-using System.Globalization;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.Localization.Routing;
 using Segfy.Schedule.Infra.Repositories;
 using Segfy.Schedule.Model.Configuration;
 
@@ -44,23 +37,9 @@ namespace Segfy.Schedule
             services.AddControllers();
             services.AddDynamoDB();
             services.AddRepositories();
-
             services.AddMediatR(typeof(IScheduleRepository));
-            services.AddLocalization(options => options.ResourcesPath = "Resources");
-
-            services.Configure<RequestLocalizationOptions>(
-                options =>
-                {
-                    var supportedCultures = new List<CultureInfo>
-                    {
-                        new CultureInfo("pt-BR")
-                    };
-
-                    options.DefaultRequestCulture = new RequestCulture(culture: "pt-BR", uiCulture: "pt-BR");
-                    options.SupportedCultures = supportedCultures;
-                    options.SupportedUICultures = supportedCultures;
-                    options.RequestCultureProviders = new[] { new RouteDataRequestCultureProvider() };
-                });
+            services.AddCustomLocalization();
+            services.AddCustomAutoMapper();
 
             services.AddMvc(options =>
             {
@@ -71,22 +50,7 @@ namespace Segfy.Schedule
                 options.RegisterValidatorsFromAssemblyContaining<Startup>();
             });
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "Agendamento",
-                    Description = "API global de tratamento de agendamentos",
-                    Version = "v1"
-                });
-
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
-
-                c.OperationFilter<XmlCommentsEscapeFilter>();
-            });
-
+            services.AddSwaggerConfig();
             services.AddCors();
         }
 
@@ -106,6 +70,7 @@ namespace Segfy.Schedule
                 .SetIsOriginAllowed(origin => true)
                 .AllowCredentials());
 
+            app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions { UseCustomSchema = true, ShowStatusCode = true });
             app.UseRouting();
 
             app.UseAuthorization();

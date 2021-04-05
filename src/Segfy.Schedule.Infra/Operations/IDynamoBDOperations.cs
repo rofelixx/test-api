@@ -11,6 +11,7 @@ namespace Segfy.Schedule.Infra.Operations
         Task SaveAsync(T entity);
         Task SaveAsync(IEnumerable<T> entity);
         Task<DynamoDBPagedRequest<T>> ScanAsync(ScanParameters parameters);
+        Task<DynamoDBPagedRequest<T>> QueryAsync(QueryParameters parameters);
         Task DeleteAsync(Guid hashid, Guid sortid);
         Task<T> LoadAsync(Guid hashid, Guid sortid);
     }

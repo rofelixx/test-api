@@ -6,6 +6,8 @@
 
   <ItemGroup>
   
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+  
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.0.1" />
     <PackageReference Include="AWSSDK.DynamoDBv2" Version="3.7.0.3" />
     <PackageReference Include="MediatR" Version="9.0.0" />

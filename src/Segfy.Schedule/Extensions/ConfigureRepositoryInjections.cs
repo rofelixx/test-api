@@ -4,7 +4,7 @@ using Segfy.Schedule.Infra.Operations;
 using Segfy.Schedule.Infra.Repositories;
 using Segfy.Schedule.Model.Entities;
 
-namespace Segfy.Schedule
+namespace Segfy.Schedule.Extensions
 {
     public static class ConfigureRepositoryInjections
     {

@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Segfy.Schedule.Model.Configuration;
 
-namespace Segfy.Schedule
+namespace Segfy.Schedule.Extensions
 {
     public static class ConfigureDynamoDbExtensions
     {
