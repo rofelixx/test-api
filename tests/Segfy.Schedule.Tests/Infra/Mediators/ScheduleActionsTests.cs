@@ -1,6 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
 using FluentAssertions;
+using MediatR;
 using Moq;
 using Segfy.Schedule.Infra.Mediators.ScheduleActions.Commands;
 using Segfy.Schedule.Infra.Mediators.ScheduleActions.Handlers;
@@ -16,8 +18,10 @@ namespace Segfy.Schedule.Tests.Infra.Mediators
         {
             //Given
             var mockContext = new Mock<IScheduleRepository>();
+            var mockMapper = new Mock<IMapper>();
+            var mockMediatr = new Mock<IMediator>();
             var command = new CreateScheduleCommand();
-            var handler = new CreateScheduleHandler(mockContext.Object);
+            var handler = new CreateScheduleHandler(mockContext.Object, mockMapper.Object, mockMediatr.Object);
             var tcs = new CancellationTokenSource(1000);
 
             //When
@@ -32,8 +36,10 @@ namespace Segfy.Schedule.Tests.Infra.Mediators
         {
             //Given
             var mockContext = new Mock<IScheduleRepository>();
+            var mockMapper = new Mock<IMapper>();
+            var mockMediatr = new Mock<IMediator>();
             var command = new DeleteScheduleCommand();
-            var handler = new DeleteScheduleHandler(mockContext.Object);
+            var handler = new DeleteScheduleHandler(mockContext.Object, mockMediatr.Object);
             var tcs = new CancellationTokenSource(1000);
 
             //When
@@ -47,8 +53,10 @@ namespace Segfy.Schedule.Tests.Infra.Mediators
         {
             //Given
             var mockContext = new Mock<IScheduleRepository>();
+            var mockMapper = new Mock<IMapper>();
+            var mockMediatr = new Mock<IMediator>();
             var command = new GetScheduleCommand();
-            var handler = new GetScheduleCommandHandler(mockContext.Object);
+            var handler = new GetScheduleCommandHandler(mockContext.Object, mockMapper.Object);
             var tcs = new CancellationTokenSource(1000);
 
             //When
@@ -63,8 +71,10 @@ namespace Segfy.Schedule.Tests.Infra.Mediators
         {
             //Given
             var mockContext = new Mock<IScheduleRepository>();
+            var mockMapper = new Mock<IMapper>();
+            var mockMediatr = new Mock<IMediator>();
             var command = new UpdateScheduleCommand();
-            var handler = new UpdateScheduleHandler(mockContext.Object);
+            var handler = new UpdateScheduleHandler(mockContext.Object, mockMapper.Object, mockMediatr.Object);
             var tcs = new CancellationTokenSource(1000);
 
             //When

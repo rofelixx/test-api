@@ -10,6 +10,7 @@ namespace Segfy.Schedule.Infra.Repositories.Base
     {
         Task<T> Single(Guid hashid, Guid sortid);
         Task<DynamoDBPagedRequest<T>> All(string paginationToken = "");
+        Task<DynamoDBPagedRequest<T>> Find(Guid hashKey, string paginationToken = "");
         Task<DynamoDBPagedRequest<T>> Find(Search searchReq, string paginationToken = "");
         Task<DynamoDBPagedRequest<T>> Find(string indexName, Search searchReq, string paginationToken = "");
         Task<T> Add(T entity);

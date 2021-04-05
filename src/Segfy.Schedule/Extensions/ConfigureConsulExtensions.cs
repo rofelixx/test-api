@@ -2,7 +2,7 @@ using System;
 using Microsoft.Extensions.Configuration;
 using Winton.Extensions.Configuration.Consul;
 
-namespace Segfy.Schedule
+namespace Segfy.Schedule.Extensions
 {
     public static class ConfigureConsulExtensions
     {

@@ -80,6 +80,17 @@ namespace Segfy.Schedule.Infra.Repositories.Base
             return _context.ScanAsync(parameters);
         }
 
+        public Task<DynamoDBPagedRequest<T>> Find(Guid hashKey, string paginationToken = "")
+        {
+            var parameters = new QueryParameters()
+            {
+                PaginationToken = paginationToken,
+                PerPage = 25,
+                HashKey = hashKey,
+            };
+            return _context.QueryAsync(parameters);
+        }
+
         protected virtual Task<T> HydrateEntityForCreation(T entity)
         {
             entity.Id = Guid.NewGuid();
@@ -92,6 +103,5 @@ namespace Segfy.Schedule.Infra.Repositories.Base
             entity.UpdatedAt = DateTime.UtcNow;
             return Task.FromResult(entity);
         }
-
     }
 }

@@ -1,124 +1,132 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Segfy.Schedule.Model.Pagination;
-using Segfy.Schedule.Model.Entities;
-using System.Linq;
 using System;
 using Segfy.Schedule.Model.Filters;
 using Segfy.Schedule.Model.Dtos;
 using System.Threading.Tasks;
+using MediatR;
+using AutoWrapper.Wrappers;
+using Segfy.Schedule.Model.Schema;
+using System.Collections.Generic;
+using Segfy.Schedule.Infra.Mediators.ScheduleActions.Commands;
 
 namespace Segfy.Schedule.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class ScheduleController : ControllerBase
     {
+        private readonly IMediator _mediator;
+
+        public ScheduleController(IMediator mediator)
+        {
+            this._mediator = mediator;
+        }
+
         /// <summary>
         /// Retorna todos os agendamentos
         /// </summary>
         /// <remarks>
         /// Exemplo de uma query:
         ///
-        ///     GET /schedule?Filters[0].Field=Kind&amp;Filters[0].Operator=EqualsTo&amp;Filters[0].Value=WhatsApp
+        ///     GET /schedule/{subscriptionId}/?Filters[0].Field=type&amp;Filters[0].Operator=EqualsTo&amp;Filters[0].Value=WhatsApp
         ///
         /// 
         /// Exemplo de paginação:
         /// 
-        ///     GET /schedule?Offset=2&amp;Limit=10
+        ///     GET /schedule/{subscriptionId}/?Offset=2&amp;Limit=10
         ///     
         /// </remarks>
+        /// <param name="subscriptionId">ID da assinatura</param>
         /// <param name="filter"></param>
         /// <response code="200">Retorna a lista paginada de agendamentos</response>
-        /// <response code="400">Algum erro relativo a validação</response>
+        /// <response code="422">Algum erro relativo a validação</response>
         /// <response code="500">Algum erro interno não tratado no servidor</response>
-        [HttpGet]
+        [HttpGet("{subscriptionId}")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(DynamoDBPagedRequest<ScheduleItemDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] FilterData filter)
+        [ProducesResponseType(typeof(ResponseModelMultiple<ScheduleItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status500InternalServerError)]
+        public async Task<ResponseModel> Get([FromRoute] Guid subscriptionId, [FromQuery] FilterData filter)
         {
-            var items = Enumerable.Range(1, 5).Select(index => new ScheduleItemDto
-            {
-                Id = Guid.NewGuid(),
-                Kind = "WhatsApp",
-                Description = "Aniversário",
-                Recurrence = Model.Enuns.Recurrence.Yearly,
-                InsuredId = Guid.NewGuid(),
-                AccountableId = Guid.NewGuid(),
-                SubscriptionId = Guid.NewGuid(),
-                Date = DateTime.Now.AddDays(index),
-            })
-            .ToArray();
-
-            return Ok(new DynamoDBPagedRequest<ScheduleItemDto> { Items = items });
+            var items = await _mediator.Send(new GetAllSchedulesCommand { SubscriptionId = subscriptionId });
+            return ResponseModelMultiple<ScheduleItemDto>.Success(items, new Pagination());
         }
 
         /// <summary>
         /// Retorna um agendamento pelo id
         /// </summary>
-        /// <param name="id">Use um uuid guid</param>
+        /// <param name="subscriptionId">ID da assinatura </param>
+        /// <param name="id">ID do registro de agendamento</param>
         /// <response code="200">Retorna a lista paginada de agendamentos</response>
-        /// <response code="400">Algum erro relativo a validação</response>
+        /// <response code="422">Algum erro relativo a validação</response>
         /// <response code="500">Algum erro interno não tratado no servidor</response>
-        [HttpGet("{id}")]
+        [HttpGet("{subscriptionId}/{id}")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(ScheduleItemDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetOne(Guid id)
+        [ProducesResponseType(typeof(ResponseModelSingle<ScheduleItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status500InternalServerError)]
+        public async Task<ResponseModel> GetOne([FromRoute] Guid subscriptionId, [FromRoute] Guid id)
         {
-            return Ok(new ScheduleItemDto
-            {
-                Id = Guid.NewGuid(),
-                Kind = "WhatsApp",
-                Description = "Aniversário",
-                Recurrence = Model.Enuns.Recurrence.Yearly,
-                InsuredId = Guid.NewGuid(),
-                AccountableId = Guid.NewGuid(),
-                SubscriptionId = Guid.NewGuid(),
-                Date = DateTime.Now.AddDays(1),
-            });
+            var item = await _mediator.Send(new GetScheduleCommand { SubscriptionId = subscriptionId, Id = id });
+            return ResponseModelSingle<ScheduleItemDto>.Success(item);
         }
 
         /// <summary>
         /// Salva e retorna o agendamento salvo
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="subscriptionId">ID da assinatura </param>
+        /// <param name="schedule"></param>
         /// <response code="200">Retorna o agendamento salvo</response>
-        /// <response code="400">Algum erro relativo a validação</response>
+        /// <response code="422">Algum erro relativo a validação</response>
         /// <response code="500">Algum erro interno não tratado no servidor</response>
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ScheduleItemDto item)
+        [HttpPost("{subscriptionId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ResponseModelSingle<ScheduleItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status500InternalServerError)]
+        public async Task<ResponseModel> Post([FromRoute] Guid subscriptionId, [FromBody] ScheduleCreationDto schedule)
         {
-            return Ok(item);
+            var item = await _mediator.Send(new CreateScheduleCommand { SubscriptionId = subscriptionId, Schedule = schedule });
+            return ResponseModelSingle<ScheduleItemDto>.Success(item);
         }
 
         /// <summary>
         /// Atualiza um agendamento
         /// </summary>
-        /// <param name="item"></param>
-        /// <response code="204">Retorna o padrão "No content" para o update</response>
+        /// <param name="subscriptionId">ID da assinatura </param>
+        /// <param name="id">ID do registro de agendamento</param>
+        /// <param name="schedule"></param>
+        /// <response code="200">Retorna o agendamento atualizado</response>
         /// <response code="400">Algum erro relativo a validação</response>
         /// <response code="500">Algum erro interno não tratado no servidor</response>
-        [HttpPut]
-        public async Task<IActionResult> Put([FromBody] ScheduleItemDto item)
+        [HttpPut("{subscriptionId}/{id}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ResponseModelSingle<ScheduleItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status500InternalServerError)]
+        public async Task<ResponseModel> Put([FromRoute] Guid subscriptionId, [FromRoute] Guid id, [FromBody] ScheduleCreationDto schedule)
         {
-            return NoContent();
+            var item = await _mediator.Send(new UpdateScheduleCommand { SubscriptionId = subscriptionId, Id = id, Schedule = schedule });
+            return ResponseModelSingle<ScheduleItemDto>.Success(item);
         }
 
         /// <summary>
         /// Remove um agendamento
         /// </summary>
-        /// <param name="id">Use um uuid guid</param>
-        /// <response code="204">Retorna o padrão "No content" para o delete</response>
+        /// <param name="subscriptionId">ID da assinatura </param>
+        /// <param name="id">ID do registro de agendamento</param>
+        /// <response code="200">Retorna a confirmação de sucesso para a ação de apagar</response>
         /// <response code="400">Algum erro relativo a validação</response>
         /// <response code="500">Algum erro interno não tratado no servidor</response>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [HttpDelete("{subscriptionId}/{id}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ResponseModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status500InternalServerError)]
+        public async Task<ResponseModel> Delete([FromRoute] Guid subscriptionId, [FromRoute] Guid id)
         {
-            return NoContent();
+            var item = await _mediator.Send(new DeleteScheduleCommand { SubscriptionId = subscriptionId, Id = id });
+            return ResponseModel.Success();
         }
     }
 }

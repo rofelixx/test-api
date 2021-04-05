@@ -5,7 +5,7 @@ namespace Segfy.Schedule.Model.Dtos
 {
     public class ScheduleItemDto : BaseDto
     {
-        public string Kind { get; set; }
+        public string Type { get; set; }
 
         public string Description { get; set; }
 
@@ -13,10 +13,12 @@ namespace Segfy.Schedule.Model.Dtos
 
         public Recurrence? Recurrence { get; set; }
 
-        public Guid InsuredId { get; set; }
+        public Guid UserId { get; set; }
 
-        public Guid AccountableId { get; set; }
+        public Guid RelationshipId { get; set; }
 
-        public string Observations { get; set; }
+        public Guid ResponsibleId { get; set; }
+
+        public string Notes { get; set; }
     }
 }
