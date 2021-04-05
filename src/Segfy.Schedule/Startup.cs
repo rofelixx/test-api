@@ -1,24 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using FluentValidation.AspNetCore;
-using Amazon.DynamoDBv2;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Segfy.Schedule.Util;
 using Segfy.Schedule.Filters;
-using Microsoft.AspNetCore.Mvc.Razor;
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Localization.Routing;
-using Microsoft.Extensions.Options;
+using Segfy.Schedule.Infra.Repositories;
 using Segfy.Schedule.Model.Configuration;
 
 namespace Segfy.Schedule
@@ -44,19 +41,11 @@ namespace Segfy.Schedule
         {
             services.Configure<AppConfiguration>(Configuration.GetSection("AppConfiguration"));
 
-            services.AddSingleton<IAmazonDynamoDB>(sp =>
-            {
-                var config = sp.GetRequiredService<IOptions<AppConfiguration>>();
-                var clientConfig = new AmazonDynamoDBConfig
-                {
-                    ServiceURL = config.Value.DynamoDbUrl
-                };
-                return new AmazonDynamoDBClient(clientConfig);
-            });
-
             services.AddControllers();
+            services.AddDynamoDB();
+            services.AddRepositories();
 
-
+            services.AddMediatR(typeof(IScheduleRepository));
             services.AddLocalization(options => options.ResourcesPath = "Resources");
 
             services.Configure<RequestLocalizationOptions>(
@@ -84,10 +73,10 @@ namespace Segfy.Schedule
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo 
+                c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Title = "Agendamento", 
-                    Description = "API global de tratamento de agendamentos", 
+                    Title = "Agendamento",
+                    Description = "API global de tratamento de agendamentos",
                     Version = "v1"
                 });
 
@@ -114,7 +103,7 @@ namespace Segfy.Schedule
             app.UseCors(x => x
                 .AllowAnyMethod()
                 .AllowAnyHeader()
-                .SetIsOriginAllowed(origin => true) 
+                .SetIsOriginAllowed(origin => true)
                 .AllowCredentials());
 
             app.UseRouting();

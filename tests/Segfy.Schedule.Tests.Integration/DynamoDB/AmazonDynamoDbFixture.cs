@@ -1,26 +1,34 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime;
+using Segfy.Schedule.Infra.Operations;
 using Segfy.Schedule.Tests.Integration.DynamoDB.Model;
 
 namespace Segfy.Schedule.Tests.Integration.DynamoDB
 {
     public class AmazonDynamoDbFixture : IDisposable
     {
-        public AmazonDynamoDBClient DbClient { get; private set; }
+        public IAmazonDynamoDB DbClient { get; private set; }
+        public IDynamoDBContext DbContext { get; private set; }
+        public IDynamoBDOperations<DummyTable> DbOperations { get; private set; }
 
         public DummyTable EntityForSingle { get; set; }
         public DummyTable EntityForUpdate { get; set; }
 
         public AmazonDynamoDbFixture()
         {
+            var url = Environment.GetEnvironmentVariable("TEST_DYNAMODB_URL");
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                url = "http://localhost:8000";
+            }
             var clientConfig = new AmazonDynamoDBConfig
             {
-                ServiceURL = "http://10.10.0.211:8000",
+                ServiceURL = url,
                 Timeout = TimeSpan.FromSeconds(10),
                 RetryMode = RequestRetryMode.Standard,
                 MaxErrorRetry = 3
@@ -47,11 +55,13 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
             var createtask = DbClient.CreateTableAsync(createTableRequest);
             createtask.GetAwaiter().GetResult();
 
-            var repo = new DummyTableRepository(DbClient);
-            var enities = new List<DummyTableViewModel>();
+            DbContext = new DynamoDBContext(DbClient);
+            DbOperations = new DynamoBDOperations<DummyTable>(DbContext);
+            var repo = new DummyTableRepository(DbOperations);
+            var enities = new List<DummyTable>();
             for (int i = 0; i < 50; i++)
             {
-                var a = new DummyTableViewModel()
+                var a = new DummyTable()
                 {
                     DummyIndex = "5753a917-18cb-4ccc-ac07-325e5a5da259",
                     DummyInteger = 1,
@@ -68,7 +78,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
                 {
                     index = Guid.NewGuid().ToString();
                 }
-                var a = new DummyTableViewModel()
+                var a = new DummyTable()
                 {
                     DummyIndex = index,
                     DummyInteger = 2,
@@ -81,7 +91,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
 
             for (int i = 0; i < 10; i++)
             {
-                var a = new DummyTableViewModel()
+                var a = new DummyTable()
                 {
                     DummyIndex = Guid.NewGuid().ToString(),
                     DummyInteger = 3,
@@ -93,7 +103,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
 
             var taskAdded = repo.Add(enities);
             var arr = taskAdded.GetAwaiter().GetResult().ToArray();
-            
+
             EntityForSingle = arr[0];
             EntityForUpdate = arr[1];
         }

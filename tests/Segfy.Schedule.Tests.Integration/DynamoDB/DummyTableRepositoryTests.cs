@@ -21,7 +21,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
         [Fact]
         public async Task DummyTableRepository_All()
         {
-            var repo = new DummyTableRepository(fixture.DbClient);
+            var repo = new DummyTableRepository(fixture.DbOperations);
             var items = await repo.All();
 
             items.Should().NotBeNull();
@@ -40,7 +40,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
         [Fact]
         public async Task DummyTableRepository_Find()
         {
-            var repo = new DummyTableRepository(fixture.DbClient);
+            var repo = new DummyTableRepository(fixture.DbOperations);
             var filter = new Filter()
             {
                 Field = "dummy_index",
@@ -62,7 +62,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
         [Fact]
         public async Task DummyTableRepository_Find_All_Index()
         {
-            var repo = new DummyTableRepository(fixture.DbClient);
+            var repo = new DummyTableRepository(fixture.DbOperations);
             var filter = new Filter()
             {
                 Field = "dummy_index",
@@ -86,7 +86,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
         [Fact]
         public async Task DummyTableRepository_Single()
         {
-            var repo = new DummyTableRepository(fixture.DbClient);
+            var repo = new DummyTableRepository(fixture.DbOperations);
 
             var items = await repo.Single(fixture.EntityForSingle.SubscriptionId, fixture.EntityForSingle.Id);
             items.Should().NotBeNull();
@@ -98,17 +98,19 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
         [Fact]
         public async Task DummyTableRepository_Update()
         {
-            var repo = new DummyTableRepository(fixture.DbClient);
+            var repo = new DummyTableRepository(fixture.DbOperations);
             var randomNum = new Random().Next();
 
-            var a = new DummyTableViewModel()
+            var a = new DummyTable()
             {
+                Id = fixture.EntityForUpdate.Id,
+                SubscriptionId = fixture.EntityForUpdate.SubscriptionId,
                 DummyIndex = "5753a917-18cb-4ccc-ac07-325e5a5da259",
                 DummyInteger = 3,
                 Text = $"teste atualizado {randomNum}"
             };
 
-            await repo.Update(fixture.EntityForUpdate.SubscriptionId, fixture.EntityForUpdate.Id, a);
+            await repo.Update(a);
 
             var items = await repo.Single(fixture.EntityForUpdate.SubscriptionId, fixture.EntityForUpdate.Id);
 

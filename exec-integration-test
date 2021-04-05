@@ -1,0 +1,1 @@
+dotnet test ./tests/Segfy.Schedule.Tests.Integration/Segfy.Schedule.Tests.Integration.csproj
