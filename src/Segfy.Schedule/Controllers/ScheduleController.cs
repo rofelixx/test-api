@@ -9,6 +9,8 @@ using AutoWrapper.Wrappers;
 using Segfy.Schedule.Model.Schema;
 using System.Collections.Generic;
 using Segfy.Schedule.Infra.Mediators.ScheduleActions.Commands;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Segfy.Schedule.Controllers
 {
@@ -45,7 +47,7 @@ namespace Segfy.Schedule.Controllers
         [HttpGet("{subscriptionId}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ResponseModelMultiple<ScheduleItemDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status500InternalServerError)]
         public async Task<ResponseModel> Get([FromRoute] Guid subscriptionId, [FromQuery] FilterData filter)
         {
@@ -64,7 +66,7 @@ namespace Segfy.Schedule.Controllers
         [HttpGet("{subscriptionId}/{id}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ResponseModelSingle<ScheduleItemDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status500InternalServerError)]
         public async Task<ResponseModel> GetOne([FromRoute] Guid subscriptionId, [FromRoute] Guid id)
         {
@@ -83,7 +85,7 @@ namespace Segfy.Schedule.Controllers
         [HttpPost("{subscriptionId}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ResponseModelSingle<ScheduleItemDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status500InternalServerError)]
         public async Task<ResponseModel> Post([FromRoute] Guid subscriptionId, [FromBody] ScheduleCreationDto schedule)
         {
@@ -103,7 +105,7 @@ namespace Segfy.Schedule.Controllers
         [HttpPut("{subscriptionId}/{id}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ResponseModelSingle<ScheduleItemDto>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status500InternalServerError)]
         public async Task<ResponseModel> Put([FromRoute] Guid subscriptionId, [FromRoute] Guid id, [FromBody] ScheduleCreationDto schedule)
         {

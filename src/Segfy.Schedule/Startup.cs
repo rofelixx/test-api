@@ -70,7 +70,7 @@ namespace Segfy.Schedule
                 .SetIsOriginAllowed(origin => true)
                 .AllowCredentials());
 
-            app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions { UseCustomSchema = true });
+            app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions { UseCustomSchema = true, ShowStatusCode = true });
             app.UseRouting();
 
             app.UseAuthorization();
