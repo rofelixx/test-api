@@ -20,6 +20,7 @@ namespace Segfy.Schedule.Infra.Mediators.ScheduleActions.Handlers
             var item = await _repository.Single(request.SubscriptionId, request.Id);
             // TODO mapper
             var entity = _repository.Update(item);
+            // TODO publish para log
             // TODO mapper
             return new ScheduleViewModel();
         }

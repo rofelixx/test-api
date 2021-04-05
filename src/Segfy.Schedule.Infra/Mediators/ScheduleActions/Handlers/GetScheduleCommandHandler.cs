@@ -10,7 +10,7 @@ namespace Segfy.Schedule.Infra.Mediators.ScheduleActions.Handlers
     public class GetScheduleCommandHandler : IRequestHandler<GetScheduleCommand, ScheduleViewModel>
     {
         private readonly IScheduleRepository _repository;
-        public GetScheduleCommandHandler(IMediator mediator, IScheduleRepository repository)
+        public GetScheduleCommandHandler(IScheduleRepository repository)
         {
             this._repository = repository;
         }

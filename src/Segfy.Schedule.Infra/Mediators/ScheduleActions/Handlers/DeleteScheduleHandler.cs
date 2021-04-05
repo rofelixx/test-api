@@ -6,7 +6,7 @@ using Segfy.Schedule.Infra.Repositories;
 
 namespace Segfy.Schedule.Infra.Mediators.ScheduleActions.Handlers
 {
-    public class DeleteScheduleHandler : AsyncRequestHandler<DeleteScheduleCommand>
+    public class DeleteScheduleHandler : IRequestHandler<DeleteScheduleCommand, Unit>
     {
         private readonly IScheduleRepository _repository;
         public DeleteScheduleHandler(IScheduleRepository repository)
@@ -14,9 +14,10 @@ namespace Segfy.Schedule.Infra.Mediators.ScheduleActions.Handlers
             this._repository = repository;
         }
 
-        protected override Task Handle(DeleteScheduleCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(DeleteScheduleCommand request, CancellationToken cancellationToken)
         {
-            return this._repository.Remove(request.SubscriptionId, request.Id);
+            await this._repository.Remove(request.SubscriptionId, request.Id);
+            return Unit.Value;
         }
     }
 }

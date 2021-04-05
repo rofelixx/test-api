@@ -22,6 +22,7 @@ namespace Segfy.Schedule.Infra.Mediators.ScheduleActions.Handlers
             var item = new ScheduleEntity();
             item.SubscriptionId = request.SubscriptionId;
             var entity = _repository.Add(item);
+            // TODO criar Publish para que seja criada a notificação
             // TODO mapper
             return Task.FromResult(new ScheduleViewModel());
         }
