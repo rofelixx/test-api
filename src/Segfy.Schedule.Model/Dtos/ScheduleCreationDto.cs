@@ -11,7 +11,7 @@ namespace Segfy.Schedule.Model.Dtos
 
         public DateTime? Date { get; set; }
 
-        public Recurrence? Recurrence { get; set; }
+        public string Recurrence { get; set; }
 
         public Guid UserId { get; set; }
 

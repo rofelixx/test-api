@@ -12,13 +12,19 @@ namespace Segfy.Schedule.Mappers
         {
             CreateMap<ScheduleEntity, ScheduleItemDto>()
                 .ForMember(
+                    x => x.Type,
+                    map => map.MapFrom(src => Enum.Parse(typeof(ScheduleTypes), src.Type, true)))
+                .ForMember(
                     x => x.Recurrence,
                     map => map.MapFrom(src => Enum.Parse(typeof(Recurrence), src.Recurrence, true)));
 
             CreateMap<ScheduleCreationDto, ScheduleEntity>()
                 .ForMember(
+                    x => x.Type,
+                    map => map.MapFrom(src => src.Type.ToLower()))
+                .ForMember(
                     x => x.Recurrence,
-                    map => map.MapFrom(src => src.Recurrence.GetValueOrDefault().ToString().ToLower()));
+                    map => map.MapFrom(src => src.Recurrence.ToLower()));
         }
     }
 }

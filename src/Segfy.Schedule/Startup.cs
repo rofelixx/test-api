@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AutoWrapper;
 using FluentValidation.AspNetCore;
 using MediatR;
@@ -42,6 +44,9 @@ namespace Segfy.Schedule
             }).AddFluentValidation(options =>
             {
                 options.RegisterValidatorsFromAssemblyContaining<Startup>();
+            }).AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
             services.AddDynamoDB();
             services.AddRepositories();
