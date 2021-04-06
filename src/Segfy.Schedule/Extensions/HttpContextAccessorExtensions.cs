@@ -11,16 +11,7 @@ namespace Segfy.Schedule.Extensions
         private const string SUBSCRIPTIONID = "subscription_id";
         private const string USERID = "user_id";
         private const string BROKERID = "broker_id";
-        private const string ROUTESUBSCRIPTIONID = "subscriptionId";
 
-        public static string GetRouteSubscriptionId(this IHttpContextAccessor httpContext)
-        {
-            if (httpContext.HttpContext.Request.RouteValues.TryGetValue(ROUTESUBSCRIPTIONID, out object routeValue))
-            {
-                return routeValue.ToString();
-            }
-            return "";
-        }
 
         public static string GetSegfy(this IHttpContextAccessor httpContext)
         {
@@ -37,7 +28,7 @@ namespace Segfy.Schedule.Extensions
             var item = GetDynamic(httpContext, SUBSCRIPTIONID);
             return item.ToString();
         }
-        
+
         public static string GetBrokerId(this IHttpContextAccessor httpContext)
         {
             var item = GetDynamic(httpContext, BROKERID);
@@ -47,6 +38,11 @@ namespace Segfy.Schedule.Extensions
         private static dynamic GetDynamic(IHttpContextAccessor httpContext, string key)
         {
             string json = GetSegfy(httpContext);
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return string.Empty;
+            }
+
             var values = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(json);
             return values.FirstOrDefault(x => x.Key == key).Value;
         }
