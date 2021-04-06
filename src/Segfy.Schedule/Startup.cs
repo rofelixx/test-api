@@ -33,22 +33,24 @@ namespace Segfy.Schedule
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<AppConfiguration>(Configuration.GetSection("AppConfiguration"));
+            services.Configure<AuthOptions>(Configuration.GetSection("Auth"));
 
-            services.AddControllers();
+            services.AddControllers(config =>
+            {
+                config.Filters.Add<ValidationFilter>();
+                config.Filters.Add<AuthenticationFilter>();
+            }).AddFluentValidation(options =>
+            {
+                options.RegisterValidatorsFromAssemblyContaining<Startup>();
+            });
             services.AddDynamoDB();
             services.AddRepositories();
             services.AddMediatR(typeof(IScheduleRepository));
             services.AddCustomLocalization();
             services.AddCustomAutoMapper();
+            services.AddHttpContextAccessor();
 
-            services.AddMvc(options =>
-            {
-                options.Filters.Add(new ValidationFilter());
-            })
-            .AddFluentValidation(options =>
-            {
-                options.RegisterValidatorsFromAssemblyContaining<Startup>();
-            });
+            services.ResolveJWT();
 
             services.AddSwaggerConfig();
             services.AddCors();
@@ -73,6 +75,8 @@ namespace Segfy.Schedule
             app.UseApiResponseAndExceptionWrapper(new AutoWrapperOptions { UseCustomSchema = true, ShowStatusCode = true });
             app.UseRouting();
 
+            app.UseCookies(Configuration);
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
