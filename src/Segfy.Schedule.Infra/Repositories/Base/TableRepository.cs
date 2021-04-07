@@ -16,6 +16,16 @@ namespace Segfy.Schedule.Infra.Repositories.Base
             _context = context;
         }
 
+        public Task<DynamoDBPagedRequest<T>> All(int limit = 10, string paginationToken = "")
+        {
+            var parameters = new ScanParameters()
+            {
+                PaginationToken = paginationToken,
+                PerPage = limit,
+            };
+            return _context.ScanAsync(parameters);
+        }
+
         public async Task<T> Add(T entity)
         {
             var added = await HydrateEntityForCreation(entity);
@@ -33,21 +43,6 @@ namespace Segfy.Schedule.Infra.Repositories.Base
 
             await _context.SaveAsync(dummies);
             return dummies;
-        }
-
-        public Task<DynamoDBPagedRequest<T>> All(string paginationToken = "")
-        {
-            var parameters = new ScanParameters()
-            {
-                PaginationToken = paginationToken,
-                PerPage = 25,
-            };
-            return _context.ScanAsync(parameters);
-        }
-
-        public Task<DynamoDBPagedRequest<T>> Find(Model.Filters.Filter searchReq, string paginationToken = "")
-        {
-            return Find(null, searchReq, paginationToken);
         }
 
         public Task Remove(Guid hashid, Guid sortid)
@@ -68,27 +63,37 @@ namespace Segfy.Schedule.Infra.Repositories.Base
             return item;
         }
 
-        public Task<DynamoDBPagedRequest<T>> Find(string indexName, Model.Filters.Filter searchReq, string paginationToken = "")
+        public Task<DynamoDBPagedRequest<T>> Find(Model.Filters.Filter searchReq, int limit = 10, string paginationToken = "")
+        {
+            return Find(null, searchReq, limit, paginationToken);
+        }
+
+        public Task<DynamoDBPagedRequest<T>> Find(string indexName, Model.Filters.Filter searchReq, int limit = 10, string paginationToken = "")
         {
             var parameters = new ScanParameters()
             {
                 Filters = new List<Model.Filters.Filter>() { searchReq },
                 IndexName = indexName,
-                PaginationToken = paginationToken,
-                PerPage = 25,
+                PerPage = limit,
+                PaginationToken = paginationToken
             };
             return _context.ScanAsync(parameters);
         }
 
-        public Task<DynamoDBPagedRequest<T>> Find(Guid hashKey, string paginationToken = "")
+        public Task<DynamoDBPagedRequest<T>> Query(Guid hashKey, Guid lastRangeKey, int limit = 10)
         {
             var parameters = new QueryParameters()
             {
-                PaginationToken = paginationToken,
-                PerPage = 25,
+                PerPage = limit,
                 HashKey = hashKey,
+                LastRangeKey = lastRangeKey
             };
             return _context.QueryAsync(parameters);
+        }
+
+        public Task<DynamoDBPagedRequest<T>> Query(Guid hashKey, int limit = 10)
+        {
+            return Query(hashKey, Guid.Empty, limit);
         }
 
         protected virtual Task<T> HydrateEntityForCreation(T entity)
@@ -103,5 +108,6 @@ namespace Segfy.Schedule.Infra.Repositories.Base
             entity.UpdatedAt = DateTime.UtcNow;
             return Task.FromResult(entity);
         }
+
     }
 }

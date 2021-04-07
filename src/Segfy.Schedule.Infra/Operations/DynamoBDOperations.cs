@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
@@ -82,7 +83,7 @@ namespace Segfy.Schedule.Infra.Operations
             return new DynamoDBPagedRequest<T>
             {
                 PaginationToken = results.PaginationToken,
-                Items = items,
+                Items = items.ToList(),
                 Segment = results.Segment,
                 TotalSegments = results.TotalSegments,
                 IsDone = results.IsDone,
@@ -95,11 +96,15 @@ namespace Segfy.Schedule.Infra.Operations
 
             var filter = new QueryFilter();
             filter.AddCondition("subscription_id", QueryOperator.Equal, parameters.HashKey);
-            var config = new QueryOperationConfig() { Filter = filter };
-
-            if (!string.IsNullOrWhiteSpace(parameters.PaginationToken))
+            if (parameters.LastRangeKey != Guid.Empty)
             {
-                config.PaginationToken = parameters.PaginationToken;
+                filter.AddCondition("id", QueryOperator.GreaterThan, parameters.LastRangeKey);
+            }
+
+            var config = new QueryOperationConfig() { Filter = filter, Limit = 10 };
+            if (parameters.PerPage > 0)
+            {
+                config.Limit = parameters.PerPage;
             }
 
             var results = table.Query(config);
@@ -113,6 +118,7 @@ namespace Segfy.Schedule.Infra.Operations
                 Segment = results.Segment,
                 TotalSegments = results.TotalSegments,
                 IsDone = results.IsDone,
+                LastEvaluatedKey = results.NextKey,
             };
         }
     }
