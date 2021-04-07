@@ -11,11 +11,13 @@ using System.Collections.Generic;
 using Segfy.Schedule.Infra.Mediators.ScheduleActions.Commands;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Segfy.Schedule.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
     public class ScheduleController : ControllerBase
     {
         private readonly IMediator _mediator;

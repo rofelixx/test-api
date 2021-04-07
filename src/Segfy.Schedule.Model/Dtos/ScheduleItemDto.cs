@@ -5,7 +5,7 @@ namespace Segfy.Schedule.Model.Dtos
 {
     public class ScheduleItemDto : BaseDto
     {
-        public string Type { get; set; }
+        public ScheduleTypes? Type { get; set; }
 
         public string Description { get; set; }
 

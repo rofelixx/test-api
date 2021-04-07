@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Segfy.Schedule.Filters
@@ -12,10 +13,9 @@ namespace Segfy.Schedule.Filters
                 context.Result = new UnprocessableEntityObjectResult(context.ModelState);
             }
         }
-
+        
         public void OnActionExecuted(ActionExecutedContext context)
         {
-
         }
     }
 }
