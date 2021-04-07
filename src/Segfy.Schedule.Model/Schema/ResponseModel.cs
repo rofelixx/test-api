@@ -53,6 +53,7 @@ namespace Segfy.Schedule.Model.Schema
     public class Pagination
     {
         public Guid? NextKey { get; set; }
+        public string NextApiPage { get; set; }
 
     }
 }

@@ -69,6 +69,7 @@ namespace Segfy.Schedule.Controllers
             if (items.NextKey.GetValueOrDefault() != Guid.Empty)
             {
                 pagination.NextKey = items.NextKey;
+                pagination.NextApiPage = $"/schedule/{subscriptionId}/?lastKey={items.NextKey}&limit={filter.Limit}";
             }
 
             return ResponseModelMultiple<ScheduleItemDto>.Success(items.Items, pagination);
