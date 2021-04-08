@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -10,6 +11,7 @@ using Segfy.Schedule.Infra.Mediators.ScheduleActions.Handlers;
 using Segfy.Schedule.Infra.Repositories;
 using Segfy.Schedule.Model.Dtos;
 using Segfy.Schedule.Model.Entities;
+using Segfy.Schedule.Model.Pagination;
 using Xunit;
 
 namespace Segfy.Schedule.Tests.Infra.Mediators
@@ -73,6 +75,31 @@ namespace Segfy.Schedule.Tests.Infra.Mediators
             var mockMediatr = new Mock<IMediator>();
             var command = new GetScheduleCommand();
             var handler = new GetScheduleCommandHandler(mockContext.Object, mockMapper.Object);
+            var tcs = new CancellationTokenSource(1000);
+
+            //When
+            var items = await handler.Handle(command, tcs.Token);
+
+            //Then
+            items.Should().NotBeNull();
+        }
+
+        [Fact]
+        public async Task GetAllSchedulesCommandHandler_Handle()
+        {
+            //Given
+            var mockContext = new Mock<IScheduleRepository>();
+            mockContext
+               .Setup(x => x.Query(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<int>()))
+               .ReturnsAsync(new DynamoDBPagedRequest<ScheduleEntity>() { LastEvaluatedKey = new Dictionary<string, Amazon.DynamoDBv2.Model.AttributeValue>() });
+
+            var mockMapper = new Mock<IMapper>();
+            mockMapper
+               .Setup(x => x.Map<IEnumerable<ScheduleItemDto>>(It.IsAny<IEnumerable<ScheduleEntity>>()))
+               .Returns(new List<ScheduleItemDto>());
+            var mockMediatr = new Mock<IMediator>();
+            var command = new GetAllSchedulesCommand();
+            var handler = new GetAllSchedulesCommandHandler(mockContext.Object, mockMapper.Object);
             var tcs = new CancellationTokenSource(1000);
 
             //When

@@ -1,9 +1,12 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using MediatR;
 using Moq;
 using Segfy.Schedule.Controllers;
+using Segfy.Schedule.Infra.Mediators.ScheduleActions.Commands;
+using Segfy.Schedule.Model.Dtos;
 using Xunit;
 
 namespace Segfy.Schedule.Tests.Controllers
@@ -15,10 +18,32 @@ namespace Segfy.Schedule.Tests.Controllers
         {
             //Given
             var mockMediatr = new Mock<IMediator>();
+            mockMediatr.Setup(_ => _.Send(It.IsAny<GetAllSchedulesCommand>(), It.IsAny<CancellationToken>())).ReturnsAsync(new Model.Dtos.PaginationDto<Model.Dtos.ScheduleItemDto>());
             var controller = new ScheduleController(mockMediatr.Object);
 
             //When
             var item = await controller.Get(Guid.NewGuid(), new Model.Filters.FilterData());
+
+            //Then
+            item.Should().NotBeNull("response types should be consistent");
+            item.IsSuccessful.Should().BeTrue("there is no reason for request to fail");
+        }
+
+        [Fact]
+        public async Task GetAction_WillReturnResponseModel_WhenPaginationIsSet()
+        {
+            //Given
+            var mockMediatr = new Mock<IMediator>();
+            mockMediatr
+                .Setup(_ => _.Send(It.IsAny<GetAllSchedulesCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new PaginationDto<ScheduleItemDto>() { NextKey = Guid.NewGuid() });
+            var controller = new ScheduleController(mockMediatr.Object);
+
+            //When
+            var filterData = new Model.Filters.FilterData();
+            filterData.Limit = 10;
+            filterData.LastKey = Guid.NewGuid();
+            var item = await controller.Get(Guid.NewGuid(), filterData);
 
             //Then
             item.Should().NotBeNull("response types should be consistent");

@@ -101,6 +101,18 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
                 enities.Add(a);
             }
 
+            
+            for (int i = 0; i < 100; i++)
+            { var a = new DummyTable()
+                {
+                    DummyIndex = "4979b46d-1d5a-4491-bbb1-c065d58a3c02",
+                    DummyInteger = 4,
+                    SubscriptionId = new Guid("c89d0a05-1022-46da-b68e-8db86df5fb3c"),
+                    Text = "teste 4"
+                };
+                enities.Add(a);
+            }
+
             var taskAdded = repo.Add(enities);
             var arr = taskAdded.GetAwaiter().GetResult().ToArray();
 

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Segfy.Schedule.Model.Filters
 {
@@ -14,9 +11,9 @@ namespace Segfy.Schedule.Model.Filters
             Sorts = new List<Sort>();
         }
 
-        public int Offset { get; set; }
+        public Guid? LastKey { get; set; }
 
-        public int Limit { get; set; }
+        public int? Limit { get; set; }
 
         public IEnumerable<Sort> Sorts { get; set; }
 

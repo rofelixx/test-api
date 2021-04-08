@@ -38,7 +38,7 @@ namespace Segfy.Schedule.Controllers
         /// 
         /// Exemplo de paginação:
         /// 
-        ///     GET /schedule/{subscriptionId}/?Offset=2&amp;Limit=10
+        ///     GET /schedule/{subscriptionId}/?lastKey=ca4f01b5-4464-4eb2-8772-2f6b319916ed&amp;limit=15
         ///     
         /// </remarks>
         /// <param name="subscriptionId">ID da assinatura</param>
@@ -53,8 +53,26 @@ namespace Segfy.Schedule.Controllers
         [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status500InternalServerError)]
         public async Task<ResponseModel> Get([FromRoute] Guid subscriptionId, [FromQuery] FilterData filter)
         {
-            var items = await _mediator.Send(new GetAllSchedulesCommand { SubscriptionId = subscriptionId });
-            return ResponseModelMultiple<ScheduleItemDto>.Success(items, new Pagination());
+            var command = new GetAllSchedulesCommand { SubscriptionId = subscriptionId };
+            if (filter.Limit.HasValue)
+            {
+                command.PerPage = filter.Limit.GetValueOrDefault();
+            }
+            if (filter.LastKey.HasValue)
+            {
+                command.NextKey = filter.LastKey.GetValueOrDefault();
+            }
+
+            var items = await _mediator.Send(command);
+
+            var pagination = new Pagination();
+            if (items.NextKey.GetValueOrDefault() != Guid.Empty)
+            {
+                pagination.NextKey = items.NextKey;
+                pagination.NextApiPage = $"/schedule/{subscriptionId}/?lastKey={items.NextKey}&limit={filter.Limit}";
+            }
+
+            return ResponseModelMultiple<ScheduleItemDto>.Success(items.Items, pagination);
         }
 
         /// <summary>
