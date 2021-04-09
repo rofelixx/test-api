@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Segfy.Schedule.Infra.Handles
 {
-    public interface IDynamoBDFilterHandles
+    public interface IDynamoBDFiltersHandle
     {
         void Apply(QueryFilter queryFilter, IList<Model.Filters.Filter> filters);
     }

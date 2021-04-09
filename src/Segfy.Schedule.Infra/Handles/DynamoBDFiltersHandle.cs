@@ -1,11 +1,12 @@
 ﻿using Amazon.DynamoDBv2.DocumentModel;
 using Segfy.Schedule.Model.Enuns;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Segfy.Schedule.Infra.Handles
 {
-    public class DynamoBDFilterHandles : IDynamoBDFilterHandles
+    public class DynamoBDFiltersHandle : IDynamoBDFiltersHandle
     {
         private readonly Dictionary<OperatorType, ScanOperator> operators = new Dictionary<OperatorType, ScanOperator>
         {
@@ -29,9 +30,39 @@ namespace Segfy.Schedule.Infra.Handles
             {
                 foreach (Model.Filters.Filter userFilter in filters)
                 {
-                    queryFilter.AddCondition(userFilter.Field, operators[userFilter.Operator], userFilter.Value);
+                    queryFilter.AddCondition(userFilter.Field, operators[userFilter.Operator], ToEntries(userFilter.Value));
                 }
             }
+        }
+
+        private DynamoDBEntry[] ToEntries(string[] values)
+        {
+            return values.Select(v => ToEntry(v)).ToArray();
+        }
+
+        private DynamoDBEntry ToEntry(string value)
+        {
+            if (value == null)
+                return new DynamoDBNull();
+            if (IsDateTime(value))
+                return Convert.ToDateTime(value);
+            return value.ToString();
+        }
+
+        private bool IsDateTime(string text)
+        {
+            DateTime dateTime;
+            bool isDateTime = false;
+
+            // Check for empty string.
+            if (string.IsNullOrEmpty(text))
+            {
+                return false;
+            }
+
+            isDateTime = DateTime.TryParse(text, out dateTime);
+
+            return isDateTime;
         }
     }
 }

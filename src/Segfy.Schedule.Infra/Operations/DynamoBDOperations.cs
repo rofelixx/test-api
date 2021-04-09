@@ -18,12 +18,12 @@ namespace Segfy.Schedule.Infra.Operations
     public class DynamoBDOperations<T> : IDynamoBDOperations<T> where T : BaseEntity
     {
         protected readonly IDynamoDBContext _context;
-        protected readonly IDynamoBDFilterHandles _filterHandle;
+        protected readonly IDynamoBDFiltersHandle _filtersHandle;
 
-        public DynamoBDOperations(IDynamoDBContext context, IDynamoBDFilterHandles filterHandle)
+        public DynamoBDOperations(IDynamoDBContext context, IDynamoBDFiltersHandle filtersHandle)
         {
             _context = context;
-            _filterHandle = filterHandle;
+            _filtersHandle = filtersHandle;
         }
 
         public Task SaveAsync(T entity)
@@ -104,15 +104,7 @@ namespace Segfy.Schedule.Infra.Operations
                 filter.AddCondition("id", QueryOperator.GreaterThan, parameters.LastRangeKey);
             }
 
-            _filterHandle.Apply(filter, parameters.Filters);
-
-            if (parameters.Filters != null && parameters.Filters.Any())
-            {
-                foreach (Model.Filters.Filter userFilter in parameters.Filters)
-                {
-                    filter.AddCondition(userFilter.Field, QueryOperator.Equal, userFilter.Value);
-                }
-            }
+            _filtersHandle.Apply(filter, parameters.Filters);
 
             var config = new QueryOperationConfig() { Filter = filter, Limit = 10 };
             if (parameters.PerPage > 0)
@@ -120,10 +112,21 @@ namespace Segfy.Schedule.Infra.Operations
                 config.Limit = parameters.PerPage;
             }
 
-            var results = table.Query(config);
-            List<Document> data = await results.GetNextSetAsync();
+            IEnumerable<T> items;
 
-            var items = _context.FromDocuments<T>(data);
+            var results = table.Query(config);
+
+            try
+            {
+                List<Document> data = await results.GetNextSetAsync();
+
+                items = _context.FromDocuments<T>(data);
+            }
+            catch
+            {
+                items = null;
+            }
+
             return new DynamoDBPagedRequest<T>
             {
                 PaginationToken = results.PaginationToken,

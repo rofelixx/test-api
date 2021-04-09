@@ -27,7 +27,7 @@ namespace Segfy.Schedule.Infra.Mediators.ScheduleActions.Handlers
             var entity = await _repository.Query(request.SubscriptionId, request.NextKey, request.PerPage, request.Filters);
             var response = _mapper.Map<IEnumerable<ScheduleItemDto>>(entity.Items);
             Guid? nextKey = null;
-            if (entity.LastEvaluatedKey.TryGetValue("id", out AttributeValue value))
+            if (entity.LastEvaluatedKey != null && entity.LastEvaluatedKey.TryGetValue("id", out AttributeValue value))
             {
                 nextKey = Guid.Parse(value.S);
             }
