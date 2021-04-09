@@ -31,15 +31,33 @@ namespace Segfy.Schedule.Controllers
         /// Retorna todos os agendamentos
         /// </summary>
         /// <remarks>
-        /// Exemplo de uma query:
+        /// Exemplo de query:
         ///
-        ///     GET /schedule/{subscriptionId}/?Filters[0].Field=type&amp;Filters[0].Operator=EqualsTo&amp;Filters[0].Value=WhatsApp
+        ///     GET /schedule/{subscriptionId}/?Filters[0].Field=type&amp;Filters[0].Operator=EqualsTo&amp;Filters[0].Value=whatsApp
         ///
+        /// Exemplo de query entre duas datas:
+        ///     
+        ///     GET /schedule/{subscriptionId}/?Filters[0].Field=created_at&amp;Filters[0].Operator=Between&amp;Filters[0].Value=2021-04-07T17:38:08.227-03:00&amp;Filters[0].Value=2021-04-09T17:38:08.227-03:00
         /// 
         /// Exemplo de paginação:
         /// 
         ///     GET /schedule/{subscriptionId}/?lastKey=ca4f01b5-4464-4eb2-8772-2f6b319916ed&amp;limit=15
         ///     
+        /// Operadores (Operator) aceitos:
+        ///
+        ///     Equal,
+        ///     NotEqual,
+        ///     LessThanOrEqual,
+        ///     LessThan,
+        ///     GreaterThanOrEqual,
+        ///     GreaterThan,
+        ///     IsNotNull,
+        ///     IsNull,
+        ///     Contains,
+        ///     NotContains,
+        ///     BeginsWith,
+        ///     In,
+        ///     Between
         /// </remarks>
         /// <param name="subscriptionId">ID da assinatura</param>
         /// <param name="filter"></param>
