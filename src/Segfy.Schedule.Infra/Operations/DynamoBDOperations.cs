@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using Segfy.Schedule.Infra.Handles;
 using Segfy.Schedule.Model.Entities;
 using Segfy.Schedule.Model.Pagination;
 
@@ -17,10 +18,12 @@ namespace Segfy.Schedule.Infra.Operations
     public class DynamoBDOperations<T> : IDynamoBDOperations<T> where T : BaseEntity
     {
         protected readonly IDynamoDBContext _context;
+        protected readonly IDynamoBDFiltersHandle _filtersHandle;
 
-        public DynamoBDOperations(IDynamoDBContext context)
+        public DynamoBDOperations(IDynamoDBContext context, IDynamoBDFiltersHandle filtersHandle)
         {
             _context = context;
+            _filtersHandle = filtersHandle;
         }
 
         public Task SaveAsync(T entity)
@@ -101,16 +104,29 @@ namespace Segfy.Schedule.Infra.Operations
                 filter.AddCondition("id", QueryOperator.GreaterThan, parameters.LastRangeKey);
             }
 
+            _filtersHandle.Apply(filter, parameters.Filters);
+
             var config = new QueryOperationConfig() { Filter = filter, Limit = 10 };
             if (parameters.PerPage > 0)
             {
                 config.Limit = parameters.PerPage;
             }
 
-            var results = table.Query(config);
-            List<Document> data = await results.GetNextSetAsync();
+            IEnumerable<T> items;
 
-            var items = _context.FromDocuments<T>(data);
+            var results = table.Query(config);
+
+            try
+            {
+                List<Document> data = await results.GetNextSetAsync();
+
+                items = _context.FromDocuments<T>(data);
+            }
+            catch
+            {
+                items = null;
+            }
+
             return new DynamoDBPagedRequest<T>
             {
                 PaginationToken = results.PaginationToken,

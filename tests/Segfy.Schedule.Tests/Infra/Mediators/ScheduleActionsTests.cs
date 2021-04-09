@@ -90,7 +90,7 @@ namespace Segfy.Schedule.Tests.Infra.Mediators
             //Given
             var mockContext = new Mock<IScheduleRepository>();
             mockContext
-               .Setup(x => x.Query(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<int>()))
+               .Setup(x => x.Query(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<int>(), null))
                .ReturnsAsync(new DynamoDBPagedRequest<ScheduleEntity>() { LastEvaluatedKey = new Dictionary<string, Amazon.DynamoDBv2.Model.AttributeValue>() });
 
             var mockMapper = new Mock<IMapper>();
