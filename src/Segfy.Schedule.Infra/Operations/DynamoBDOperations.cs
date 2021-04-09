@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using Segfy.Schedule.Infra.Handles;
 using Segfy.Schedule.Model.Entities;
 using Segfy.Schedule.Model.Pagination;
 
@@ -17,10 +18,12 @@ namespace Segfy.Schedule.Infra.Operations
     public class DynamoBDOperations<T> : IDynamoBDOperations<T> where T : BaseEntity
     {
         protected readonly IDynamoDBContext _context;
+        protected readonly IDynamoBDFilterHandles _filterHandle;
 
-        public DynamoBDOperations(IDynamoDBContext context)
+        public DynamoBDOperations(IDynamoDBContext context, IDynamoBDFilterHandles filterHandle)
         {
             _context = context;
+            _filterHandle = filterHandle;
         }
 
         public Task SaveAsync(T entity)
@@ -99,6 +102,16 @@ namespace Segfy.Schedule.Infra.Operations
             if (parameters.LastRangeKey != Guid.Empty)
             {
                 filter.AddCondition("id", QueryOperator.GreaterThan, parameters.LastRangeKey);
+            }
+
+            _filterHandle.Apply(filter, parameters.Filters);
+
+            if (parameters.Filters != null && parameters.Filters.Any())
+            {
+                foreach (Model.Filters.Filter userFilter in parameters.Filters)
+                {
+                    filter.AddCondition(userFilter.Field, QueryOperator.Equal, userFilter.Value);
+                }
             }
 
             var config = new QueryOperationConfig() { Filter = filter, Limit = 10 };

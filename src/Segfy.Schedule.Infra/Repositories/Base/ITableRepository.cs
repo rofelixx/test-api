@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Segfy.Schedule.Model.Entities;
+using Segfy.Schedule.Model.Filters;
 using Segfy.Schedule.Model.Pagination;
 
 namespace Segfy.Schedule.Infra.Repositories.Base
@@ -11,7 +12,7 @@ namespace Segfy.Schedule.Infra.Repositories.Base
         Task<T> Single(Guid hashid, Guid sortid);
         Task<DynamoDBPagedRequest<T>> All(int limit = 10, string paginationToken = "");
         Task<DynamoDBPagedRequest<T>> Query(Guid hashKey, int limit = 10);
-        Task<DynamoDBPagedRequest<T>> Query(Guid hashKey, Guid nextRangeKey, int limit = 10);
+        Task<DynamoDBPagedRequest<T>> Query(Guid hashKey, Guid nextRangeKey, int limit = 10, IList<Filter> filters = null);
         Task<DynamoDBPagedRequest<T>> Find(Search searchReq, int limit = 10, string paginationToken = "");
         Task<DynamoDBPagedRequest<T>> Find(string indexName, Search searchReq, int limit = 10, string paginationToken = "");
         Task<T> Add(T entity);

@@ -53,7 +53,7 @@ namespace Segfy.Schedule.Controllers
         [ProducesResponseType(typeof(ErrorSchema), StatusCodes.Status500InternalServerError)]
         public async Task<ResponseModel> Get([FromRoute] Guid subscriptionId, [FromQuery] FilterData filter)
         {
-            var command = new GetAllSchedulesCommand { SubscriptionId = subscriptionId };
+            var command = new GetAllSchedulesCommand { SubscriptionId = subscriptionId, Filters = filter.Filters };
             if (filter.Limit.HasValue)
             {
                 command.PerPage = filter.Limit.GetValueOrDefault();

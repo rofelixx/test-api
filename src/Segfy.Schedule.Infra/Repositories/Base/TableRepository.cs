@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Segfy.Schedule.Infra.Operations;
 using Segfy.Schedule.Model.Entities;
+using Segfy.Schedule.Model.Filters;
 using Segfy.Schedule.Model.Pagination;
 
 namespace Segfy.Schedule.Infra.Repositories.Base
@@ -80,13 +81,14 @@ namespace Segfy.Schedule.Infra.Repositories.Base
             return _context.ScanAsync(parameters);
         }
 
-        public Task<DynamoDBPagedRequest<T>> Query(Guid hashKey, Guid lastRangeKey, int limit = 10)
+        public Task<DynamoDBPagedRequest<T>> Query(Guid hashKey, Guid lastRangeKey, int limit = 10, IList<Filter> filters = null)
         {
             var parameters = new QueryParameters()
             {
                 PerPage = limit,
                 HashKey = hashKey,
-                LastRangeKey = lastRangeKey
+                LastRangeKey = lastRangeKey,
+                Filters = filters
             };
             return _context.QueryAsync(parameters);
         }

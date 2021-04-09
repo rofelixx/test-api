@@ -24,7 +24,7 @@ namespace Segfy.Schedule.Infra.Mediators.ScheduleActions.Handlers
 
         public async Task<PaginationDto<ScheduleItemDto>> Handle(GetAllSchedulesCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _repository.Query(request.SubscriptionId, request.NextKey, request.PerPage);
+            var entity = await _repository.Query(request.SubscriptionId, request.NextKey, request.PerPage, request.Filters);
             var response = _mapper.Map<IEnumerable<ScheduleItemDto>>(entity.Items);
             Guid? nextKey = null;
             if (entity.LastEvaluatedKey.TryGetValue("id", out AttributeValue value))

@@ -1,4 +1,6 @@
+using Segfy.Schedule.Model.Filters;
 using System;
+using System.Collections.Generic;
 
 namespace Segfy.Schedule.Infra.Operations
 {
@@ -7,5 +9,7 @@ namespace Segfy.Schedule.Infra.Operations
         public Guid HashKey { get; set; }
         public int PerPage { get; set; }
         public Guid LastRangeKey { get; set; }
+
+        public IList<Filter> Filters { get; set; }
     }
 }
