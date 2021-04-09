@@ -5,6 +5,7 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.Model;
 using Amazon.Runtime;
+using Segfy.Schedule.Infra.Handles;
 using Segfy.Schedule.Infra.Operations;
 using Segfy.Schedule.Tests.Integration.DynamoDB.Model;
 
@@ -14,6 +15,9 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
     {
         public IAmazonDynamoDB DbClient { get; private set; }
         public IDynamoDBContext DbContext { get; private set; }
+
+        public IDynamoBDFiltersHandle FiltersHandle { get; private set; }
+
         public IDynamoBDOperations<DummyTable> DbOperations { get; private set; }
 
         public DummyTable EntityForSingle { get; set; }
@@ -56,7 +60,8 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
             createtask.GetAwaiter().GetResult();
 
             DbContext = new DynamoDBContext(DbClient);
-            DbOperations = new DynamoBDOperations<DummyTable>(DbContext);
+            FiltersHandle = new DynamoBDFiltersHandle();
+            DbOperations = new DynamoBDOperations<DummyTable>(DbContext, FiltersHandle);
             var repo = new DummyTableRepository(DbOperations);
             var enities = new List<DummyTable>();
             for (int i = 0; i < 50; i++)

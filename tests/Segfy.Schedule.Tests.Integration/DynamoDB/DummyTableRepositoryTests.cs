@@ -44,7 +44,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
             var filter = new Filter()
             {
                 Field = "dummy_index",
-                Value = "5753a917-18cb-4ccc-ac07-325e5a5da259"
+                Value = new string[] { "5753a917-18cb-4ccc-ac07-325e5a5da259" }
             };
             var items = await repo.Find("dummy_index", filter);
             var totalItems = new List<DummyTable>();
@@ -67,7 +67,7 @@ namespace Segfy.Schedule.Tests.Integration.DynamoDB
             var filter = new Filter()
             {
                 Field = "dummy_index",
-                Value = "5753a917-18cb-4ccc-ac07-325e5a5da259"
+                Value = new string[] { "5753a917-18cb-4ccc-ac07-325e5a5da259" }
             };
 
             var totalItems = new List<DummyTable>();
