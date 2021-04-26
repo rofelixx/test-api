@@ -1,13 +1,39 @@
-variables:
-  PROJECT_NAME: 'Segfy.Schedule'
-  BUILD_IMAGE: 'registry.gitlab.com/segfy/docker_images/build_dotnet/dotnet5:4.0.3'
+.deploy-common: &deploy-common
+  stage: deploy
+  before_script:
+    - 'which ssh-agent || ( apt-get update -q -y && apt-get install openssh-client -q -y )'
+    - eval $(ssh-agent -s)
+    - echo "$GLR_PRIV_SSH_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - SSH_OPTIONS="-o StrictHostKeyChecking=no -o ControlMaster=auto -o ControlPersist=120s"
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  environment:
+    name: $CI_COMMIT_BRANCH    
+  tags:
+    - segfy
+
+.integration-rules: &integration-rules
+  rules:
+  - if: $CI_COMMIT_BRANCH == "qa"
+
+# -------------------------------------
 
 stages:
   - unit-test
   - integration-prepare
   - integration-test
   - integration-cleanup
-  - docker
+  - publish
+  - deploy
+
+variables:
+  PROJECT_NAME: 'Segfy.Schedule'
+  BUILD_IMAGE: 'registry.gitlab.com/segfy/docker_images/build_dotnet/dotnet5:4.0.3'
+
+# -------------------------------------
 
 unit-test:
   stage: unit-test
@@ -21,10 +47,6 @@ unit-test:
       cobertura: ./tests/$PROJECT_NAME.Tests/coverage.cobertura.xml
   tags:
     - segfy
-
-.integration-rules: &integration-rules
-  rules:
-  - if: $CI_COMMIT_BRANCH == "qa"
 
 integration:prepare:
   stage: integration-prepare
@@ -57,9 +79,11 @@ integration:cleanup:
   tags:
     - segfy-bash
 
+# -------------------------------------
+
 docker-build:
   image: docker:latest
-  stage: docker
+  stage: publish
   services:
     - docker:dind
   before_script:
@@ -81,3 +105,28 @@ docker-build:
     - if: $CI_COMMIT_TAG != null
   tags:
     - segfy
+
+# -------------------------------------
+
+deploy-dev:
+  <<: *deploy-common
+  script:
+    - ssh $SSH_OPTIONS root@$HOST "docker run -d --rm -p 5050 --name schedule-api-dev $CI_REGISTRY_IMAGE:dev"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+
+deploy-qa:
+  <<: *deploy-common
+  script:
+    - ssh $SSH_OPTIONS root@$HOST "docker run -d --rm -p 5050 --name schedule-api-qa $CI_REGISTRY_IMAGE:qa"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "qa"
+
+deploy-prod:
+  <<: *deploy-common
+  script:
+    - ssh $SSH_OPTIONS root@$HOST "docker run -d --rm -p 5050 --name schedule-api-prod $CI_REGISTRY_IMAGE:latest"
+  rules:
+    - if: $CI_COMMIT_TAG != null
+  environment:
+    name: "prod"
