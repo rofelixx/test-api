@@ -13,7 +13,7 @@
   environment:
     name: $CI_COMMIT_BRANCH    
   tags:
-    - segfy
+    - segfy-bash
 
 .integration-rules: &integration-rules
   rules:
