@@ -9,7 +9,6 @@
     - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     - SSH_OPTIONS="-o StrictHostKeyChecking=no -o ControlMaster=auto -o ControlPersist=120s"
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   environment:
     name: $CI_COMMIT_BRANCH    
   tags:
@@ -111,6 +110,7 @@ docker-build:
 deploy-dev:
   <<: *deploy-common
   script:
+    - ssh $SSH_OPTIONS root@$HOST "docker login -u "$CI_REGISTRY_USER" -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
     - ssh $SSH_OPTIONS root@$HOST "docker run -d --rm -p 5050 --name schedule-api-dev $CI_REGISTRY_IMAGE:dev"
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
