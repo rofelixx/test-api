@@ -111,7 +111,7 @@ deploy-dev:
   script:
     - ssh $SSH_OPTIONS root@$HOST "docker pull $CI_REGISTRY_IMAGE:dev"
     - ssh $SSH_OPTIONS root@$HOST "docker rm -f schedule-api-dev"
-    - ssh $SSH_OPTIONS root@$HOST "docker run -d --restart always -p 5050:5050--name schedule-api-dev $CI_REGISTRY_IMAGE:dev"
+    - ssh $SSH_OPTIONS root@$HOST "docker run -d --restart always -p 5050:5050 --name schedule-api-dev $CI_REGISTRY_IMAGE:dev"
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
   environment:
