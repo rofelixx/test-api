@@ -10,8 +10,6 @@
     - chmod 644 ~/.ssh/known_hosts
     - SSH_OPTIONS="-o StrictHostKeyChecking=no -o ControlMaster=auto -o ControlPersist=120s"
     - ssh $SSH_OPTIONS root@$HOST "docker login -u "$CI_REGISTRY_USER" -p $CI_REGISTRY_PASSWORD $CI_REGISTRY"
-  tags:
-    - segfy-bash
 
 .integration-rules: &integration-rules
   rules:
@@ -44,7 +42,7 @@ unit-test:
     reports:
       cobertura: ./tests/$PROJECT_NAME.Tests/coverage.cobertura.xml
   tags:
-    - segfy
+    - segfy-docker
 
 integration:prepare:
   stage: integration-prepare
@@ -52,7 +50,7 @@ integration:prepare:
   script:
     - docker-compose -f ./tests/docker-compose.test.yml up --force-recreate --build -d
   tags:
-    - segfy-bash
+    - segfy-qa-bash
 
 integration:test:
   stage: integration-test
@@ -65,7 +63,7 @@ integration:test:
   needs:
     - job: integration:prepare
   tags:
-    - segfy
+    - segfy-qa-docker
 
 integration:cleanup:
   stage: integration-cleanup
@@ -75,7 +73,7 @@ integration:cleanup:
   needs:
     - job: integration:test
   tags:
-    - segfy-bash
+    - segfy-qa-bash
 
 # -------------------------------------
 
@@ -102,7 +100,7 @@ docker-build:
     - if: $CI_COMMIT_BRANCH == "qa"
     - if: $CI_COMMIT_TAG != null
   tags:
-    - segfy
+    - segfy-docker
 
 # -------------------------------------
 
@@ -115,7 +113,9 @@ deploy-dev:
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
   environment:
-    name: $CI_COMMIT_BRANCH    
+    name: $CI_COMMIT_BRANCH
+  tags:
+    - segfy-dev-bash    
 
 deploy-qa:
   <<: *deploy-common
@@ -126,7 +126,9 @@ deploy-qa:
   rules:
     - if: $CI_COMMIT_BRANCH == "qa"
   environment:
-    name: $CI_COMMIT_BRANCH    
+    name: $CI_COMMIT_BRANCH
+  tags:
+    - segfy-qa-bash    
 
 deploy-prod:
   <<: *deploy-common
@@ -137,3 +139,5 @@ deploy-prod:
     - if: $CI_COMMIT_TAG != null
   environment:
     name: "prod"
+  tags:
+    - segfy-prod-bash    
