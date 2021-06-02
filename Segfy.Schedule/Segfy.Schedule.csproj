@@ -22,7 +22,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Segfy.Schedule.Infra\Segfy.Schedule.Infra.csproj" />
+	  <ProjectReference Include="..\Segfy.Schedule.Infra\Segfy.Schedule.Infra.csproj">
+	    <GlobalPropertiesToRemove></GlobalPropertiesToRemove>
+	  </ProjectReference>
 	</ItemGroup>
-
 </Project>
